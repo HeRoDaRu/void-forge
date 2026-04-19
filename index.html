@@ -2,21 +2,29 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Void-Forge</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Void Forge</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="game-container">
-        <h1>VOID<span class="accent">-FORGE</span></h1>
-        <div id="score" class="score">0</div>
-        <button id="main-clicker" class="main-clicker">✦ FORGE ESSENCE ✦</button>
+        <h1><span class="accent">VOID</span> FORGE</h1>
         
+        <div class="boss-container">
+            <div id="boss-name">Eternal Void</div>
+            <div class="boss-health-bar">
+                <div id="health-fill" class="health-fill"></div>
+            </div>
+            <div id="boss-hp-text" class="hp-text">100000 / 100000</div>
+            <div id="boss-visual" class="boss-visual">🌌</div>
+        </div>
+
         <div id="upgrades" class="upgrades"></div>
-        
+
         <div class="stats">
-            <p id="cps">Essence/s: 0.0</p>
-            <p id="total-clicks">Forjados: 0</p>
+            <p id="essence">Essence: 0</p>
+            <p id="damage-done">Daño total: 0</p>
+            <p id="dps">DPS actual: 0.0</p>
         </div>
     </div>
 

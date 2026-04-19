@@ -1,32 +1,27 @@
-# Void-Forge
+# 🌌 Void Forge: Eternal Abyss
 
-Un idle/clicker incremental hecho en vanilla HTML + CSS + JS.
+Un juego *incremental clicker* con temática de mazmorra cósmica desarrollado con **Vanilla Web Stack**. Enfréntate al Vacío Eterno, cosecha esencia y mejora tus herramientas de destrucción.
 
-Forja esencia del vacío y construye tu imperio cósmico.
+## 🕹️ Mecánicas de Juego
+- **Atacar:** Usa tus herramientas para reducir la vida del Boss. Cada ataque genera **Void Essence**.
+- **Cosechar:** El 70% del daño infligido manualmente se convierte en esencia pura.
+- **DPS Pasivo:** Tus herramientas dañan al Boss automáticamente (25% de su potencia manual).
+- **Progresión:** Si no mejoras tus herramientas, el Vacío resistirá tus ataques.
 
-## Cómo jugar
-- Haz clic en el botón central para generar **Void Essence**.
-- Compra forjas que producen esencia automáticamente.
-- Llega lo más lejos posible.
+## 🛠️ Herramientas de Forja (Upgrades)
 
-## Upgrades
+| Item | Daño Base | Coste Inicial | Descripción |
+| :--- | :---: | :---: | :--- |
+| **Void Spark** | 12 | 15 | Una pequeña chispa de energía negativa. |
+| **Echo Fragment** | 45 | 70 | Fragmentos de realidades colapsadas. |
+| **Nebula Weaver** | 160 | 320 | Tejedora de nubes de gas estelar. |
+| **Rift Anchor** | 520 | 1.100 | Ancla la existencia para golpearla mejor. |
 
-| ID | Nombre del Ítem               | Producción | Coste inicial |
-|----|-------------------------------|------------|---------------|
-| 1  | **Void Spark**                | 0.5        | 15            |
-| 2  | **Echo Fragment**             | 3          | 80            |
-| 3  | **Nebula Weaver**             | 9          | 350           |
-| 4  | **Rift Anchor**               | 28         | 1.200         |
-| 5  | **Stellar Crucible**          | 75         | 4.500         |
-| 6  | **Quantum Echo**              | 190        | 16.000        |
-| 7  | **Dark Matter Harvester**     | 480        | 55.000        |
-| 8  | **Singularity Seed**          | 1.200      | 200.000       |
-| 9  | **Void Leviathan**            | 3.200      | 750.000       |
-| 10 | **Nexus Forge**               | 8.500      | 2.500.000     |
-| 11 | **Entropy Engine**            | 22.000     | 9.000.000     |
-| 12 | **Eternal Abyss**             | 52.000     | 35.000.000    |
+## 🚀 Tecnologías
+- **Frontend:** HTML5 & CSS3 (Custom Properties & Flexbox/Grid).
+- **Lógica:** Vanilla JavaScript (ES6+).
+- **Persistencia:** `localStorage` para guardado automático de sesión.
+- **Rendimiento:** `requestAnimationFrame` para un Game Loop fluido.
 
-## Tecnologías
-- HTML5 + CSS3
-- Vanilla JavaScript (sin frameworks)
-- localStorage para guardar progreso
+---
+*Desarrollado como un proyecto de aprendizaje de mecánicas incrementales.*
