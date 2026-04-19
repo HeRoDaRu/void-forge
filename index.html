@@ -1,33 +1,51 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Void Forge</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <div class="game-container">
         <h1><span class="accent">VOID</span> FORGE</h1>
-        
+
         <div class="boss-container">
-            <div id="boss-name">Eternal Void</div>
+            <div id="boss-name">The Event Horizon</div>
             <div class="boss-health-bar">
                 <div id="health-fill" class="health-fill"></div>
             </div>
             <div id="boss-hp-text" class="hp-text">100000 / 100000</div>
-            <div id="boss-visual" class="boss-visual">🌌</div>
+            <div id="boss-visual" class="boss-visual">🌑</div>
         </div>
-
-        <div id="upgrades" class="upgrades"></div>
-
+        <div class="action-row">
+            <button id="dps-improves-btn" class="action-btn">⚡ Mejoras DPS</button>
+        </div>
         <div class="stats">
-            <p id="essence">Essence: 0</p>
-            <p id="damage-done">Daño total: 0</p>
+            <p id="essence">Essence: 0</p> ||
+            <p id="damage-done">Daño total: 0</p> ||
             <p id="dps">DPS actual: 0.0</p>
+        </div>
+        <div id="upgrades" class="upgrades"></div>
+    </div>
+
+    <!-- Modal Mejoras DPS -->
+    <div id="dps-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>⚡ Mejoras de DPS</h2>
+                <button id="close-modal-btn" class="close-modal-btn">✕</button>
+            </div>
+
+            <div id="dps-improves-list" class="dps-list">
+                <!-- Las mejoras se renderizarán aquí dinámicamente -->
+            </div>
         </div>
     </div>
 
     <script src="script.js"></script>
 </body>
+
 </html>
