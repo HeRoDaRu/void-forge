@@ -3,8 +3,8 @@ const gameState = {
     essence: 0,
     damageDone: 0,
     dps: 0,
-    bossMaxHP: 100000,
-    bossCurrentHP: 100000,
+    bossMaxHP: 10000,
+    bossCurrentHP: 10000,
     lastRegenTime: Date.now(),
     upgrades: [
         { id: 1, name: "Void Spark", baseCost: 15, cost: 15, owned: 1, manualDamage: 12 },
