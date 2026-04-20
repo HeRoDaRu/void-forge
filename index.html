@@ -12,7 +12,9 @@
             <h1><span class="accent">VOID</span> FORGE</h1>
             <div class="stats-bar">
                 <div class="stat-item"><span class="label">Essence</span><strong id="essence">0</strong></div>
+                <div class="stat-item"><span class="label">Total Damage</span><strong id="damage-done">0</strong></div>
                 <div class="stat-item"><span class="label">DPS</span><strong id="dps">0.0</strong></div>
+                <div class="stat-item"><span class="label">Loop</span><strong id="loop-count">0</strong></div>
             </div>
         </header>
 
@@ -31,8 +33,7 @@
             </div>
 
             <div class="actions-panel">
-                <button id="dps-improves-btn" class="action-btn-primary">⚡ UPGRADE DPS</button>
-                <div id="damage-done" class="total-damage">Total: 0</div>
+                <button id="dps-improves-btn" class="action-btn-primary">⚡ MEJORAR DPS</button>
             </div>
 
             <div class="upgrades-scroll">
@@ -44,7 +45,7 @@
     <div id="dps-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>⚡ DPS Core Improvements</h2>
+                <h2>⚡ Mejoras Auto Ataque</h2>
                 <button id="close-modal-btn" class="close-btn">✕</button>
             </div>
             <div id="dps-improves-list" class="dps-list"></div>
