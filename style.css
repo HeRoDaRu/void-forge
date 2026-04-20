@@ -10,6 +10,7 @@
     --gold: #ffcc00;
 }
 
+/* ==================== BASE ==================== */
 body {
     margin: 0;
     height: 100dvh;
@@ -18,8 +19,16 @@ body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     overflow: hidden;
     user-select: none;
+    touch-action: manipulation; /* ← anti-zoom móvil */
+    -webkit-tap-highlight-color: transparent;
 }
 
+button {
+    cursor: pointer;
+    touch-action: manipulation; /* ← en botones también */
+}
+
+/* ==================== LAYOUT ==================== */
 .game-container {
     height: 100%;
     display: flex;
@@ -30,10 +39,19 @@ body {
     box-sizing: border-box;
 }
 
-/* HEADER & STATS */
+.game-area {
+    flex: 1;                  /* ocupa el espacio restante bajo el header */
+    display: flex;
+    flex-direction: column;
+    min-height: 0;            /* necesario para que flex+overflow funcione en Safari */
+    gap: 10px;
+}
+
+/* ==================== HEADER & STATS ==================== */
 header {
     text-align: center;
     padding: 10px 0;
+    flex-shrink: 0;
 }
 
 h1 {
@@ -41,6 +59,10 @@ h1 {
     letter-spacing: 6px;
     margin: 0 0 10px 0;
     text-shadow: 0 0 10px var(--accent-glow);
+}
+
+.accent {
+    color: var(--accent); /* ← faltaba esta clase */
 }
 
 .stats-bar {
@@ -55,12 +77,14 @@ h1 {
 .stat-item {
     display: flex;
     flex-direction: column;
+    align-items: center;
 }
 
 .stat-item .label {
     font-size: 0.7rem;
     color: var(--text-dim);
     text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .stat-item strong {
@@ -68,19 +92,24 @@ h1 {
     font-size: 1.2rem;
 }
 
-/* BOSS SECTION */
+/* ==================== BOSS ==================== */
 .boss-section {
     flex-shrink: 0;
-    padding: 20px 0;
     text-align: center;
 }
 
+#boss-name {
+    font-size: 1rem;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+}
+
 .boss-visual-wrapper {
-    height: 160px;
+    height: 130px;
     display: flex;
     align-items: center;
     justify-content: center;
-    position: relative;
 }
 
 .boss-visual {
@@ -90,8 +119,14 @@ h1 {
 }
 
 @keyframes void-pulse {
-    0%, 100% { transform: scale(1); filter: drop-shadow(0 0 20px var(--accent)); }
-    50% { transform: scale(1.1); filter: drop-shadow(0 0 40px var(--accent)); }
+    0%, 100% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 20px var(--accent));
+    }
+    50% {
+        transform: scale(1.08);
+        filter: drop-shadow(0 0 40px var(--accent));
+    }
 }
 
 .boss-health-bar {
@@ -99,7 +134,7 @@ h1 {
     background: #111;
     border-radius: 5px;
     overflow: hidden;
-    margin: 10px 0;
+    margin: 8px 0 4px;
     border: 1px solid #333;
 }
 
@@ -111,16 +146,16 @@ h1 {
 }
 
 .hp-text {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     color: var(--text-dim);
 }
 
-/* ACTIONS */
+/* ==================== ACTIONS ==================== */
 .actions-panel {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    margin-bottom: 20px;
+    gap: 8px;
+    flex-shrink: 0;
 }
 
 .action-btn-primary {
@@ -131,10 +166,10 @@ h1 {
     border-radius: 8px;
     font-weight: bold;
     font-size: 1rem;
-    cursor: pointer;
-    transition: 0.2s;
+    transition: opacity 0.2s;
 }
 
+.action-btn-primary:hover { opacity: 0.85; }
 .action-btn-primary:active { transform: scale(0.98); }
 
 .total-damage {
@@ -143,20 +178,25 @@ h1 {
     color: var(--text-dim);
 }
 
-/* UPGRADES SCROLL AREA */
+/* ==================== UPGRADES ==================== */
 .upgrades-scroll {
-    flex-grow: 1;
+    flex: 1;
     overflow-y: auto;
-    padding-right: 5px;
+    min-height: 0; /* ← mismo fix Safari que .game-area */
+    padding-right: 4px;
 }
 
 .upgrades-scroll::-webkit-scrollbar { width: 4px; }
-.upgrades-scroll::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+.upgrades-scroll::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 10px;
+}
 
 .upgrades-grid {
     display: flex;
     flex-direction: column;
     gap: 12px;
+    padding-bottom: 10px; /* respiro al final del scroll */
 }
 
 .upgrade {
@@ -166,25 +206,38 @@ h1 {
     border-radius: 12px;
     display: flex;
     flex-direction: column;
-    transition: 0.3s;
+    transition: border-color 0.2s;
 }
 
-.upgrade.locked { opacity: 0.5; filter: grayscale(1); }
+.upgrade:not(.locked):hover {
+    border-color: #444;
+}
+
+.upgrade.locked {
+    opacity: 0.45;
+    filter: grayscale(1);
+}
 
 .upgrade-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
-.upgrade-header span { font-size: 1.1rem; font-weight: bold; }
-.count { color: var(--accent); font-family: monospace; }
+.upgrade-header span { font-size: 1rem; font-weight: bold; }
+
+.count {
+    color: var(--accent);
+    font-family: monospace;
+    font-size: 1.1rem;
+}
 
 .upgrade-info {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: var(--text-dim);
-    margin-bottom: 12px;
+    margin-bottom: 10px;
+    line-height: 1.6;
 }
 
 .cost-val { color: var(--gold); }
@@ -200,51 +253,107 @@ h1 {
     border: none;
     border-radius: 6px;
     font-weight: bold;
-    cursor: pointer;
+    font-size: 0.9rem;
 }
 
-.buy-btn { background: #222; color: var(--text); border: 1px solid #444; }
-.buy-btn:not(:disabled):hover { background: #333; border-color: var(--gold); }
+.buy-btn {
+    background: #222;
+    color: var(--text);
+    border: 1px solid #444;
+}
 
-.atk-btn { background: var(--green); color: #000; }
-.atk-btn:disabled { background: #222; color: #555; }
+.buy-btn:not(:disabled):hover {
+    background: #2a2a3a;
+    border-color: var(--gold);
+}
 
-/* MODAL */
+.buy-btn:disabled {
+    color: #555;
+    cursor: not-allowed;
+}
+
+.atk-btn {
+    background: var(--green);
+    color: #000;
+}
+
+.atk-btn:not(:disabled):hover {
+    opacity: 0.85;
+}
+
+.atk-btn:disabled {
+    background: #222;
+    color: #555;
+    cursor: not-allowed;
+}
+
+/* ==================== MODAL ==================== */
 .modal {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.85);
+    background: rgba(0, 0, 0, 0.85);
     backdrop-filter: blur(8px);
     z-index: 100;
     align-items: center;
     justify-content: center;
     padding: 20px;
+    box-sizing: border-box;
 }
 
 .modal-content {
     background: var(--card-bg);
     width: 100%;
     max-width: 400px;
+    max-height: 80vh;        /* ← evita que el modal se salga en móviles pequeños */
+    overflow-y: auto;
     border-radius: 20px;
     border: 1px solid var(--accent);
     padding: 20px;
+    box-sizing: border-box;
 }
 
 .modal-header {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     margin-bottom: 20px;
 }
 
-.close-btn { background: none; border: none; color: var(--text); font-size: 1.5rem; }
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--accent);
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 1.5rem;
+    line-height: 1;
+    padding: 4px;
+}
+
+.close-btn:hover { color: var(--red); }
+
+.dps-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
 
 .dps-item {
     background: #1a1a2e;
     padding: 15px;
     border-radius: 12px;
-    margin-bottom: 10px;
     border: 1px solid #333;
+}
+
+.dps-item p {
+    margin: 4px 0 0;
+    font-size: 0.85rem;
+    color: var(--text-dim);
 }
 
 .dps-buy-btn {
@@ -254,5 +363,16 @@ h1 {
     border-radius: 6px;
     border: none;
     background: var(--accent);
+    color: #000;
     font-weight: bold;
+    font-size: 0.95rem;
+    transition: opacity 0.2s;
+}
+
+.dps-buy-btn:not(:disabled):hover { opacity: 0.85; }
+
+.dps-buy-btn:disabled {
+    background: #333;       /* ← faltaba el estado desactivado */
+    color: #666;
+    cursor: not-allowed;
 }
