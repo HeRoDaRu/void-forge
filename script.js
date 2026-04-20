@@ -1,26 +1,36 @@
-// ====================== GAME STATE ======================
+// ======================================================
+// VOID FORGE - ENGINE V3.1 (COMPATIBLE CON UI ULTRA)
+// ======================================================
+
+// 1. CONFIGURACIÓN ESTATAL
+const SAVE_KEY = 'eternalVoidSave_v3';
+const CONFIG = {
+    upgrades: [
+        { id: 1, name: "Void Spark",   icon: "✨", baseCost: 15,   manualDamage: 12 },
+        { id: 2, name: "Echo Fragment", icon: "🔊", baseCost: 70,   manualDamage: 45 },
+        { id: 3, name: "Nebula Weaver", icon: "🌌", baseCost: 320,  manualDamage: 160 },
+        { id: 4, name: "Rift Anchor",   icon: "🌊", baseCost: 1100, manualDamage: 520 },
+    ],
+    dpsImprovements: [
+        { id: 101, upgradeId: 1, name: "Void Spark DPS",    maxLevel: 5, baseCost: 700,  multiplier: 0.25 },
+        { id: 201, upgradeId: 2, name: "Echo Fragment DPS", maxLevel: 5, baseCost: 2500, multiplier: 0.35 },
+    ],
+    growth: { upgrade: 1.18, dps: 1.25 },
+    essenceRatio: 0.7
+};
+
+// 2. ESTADO DEL JUEGO
 const gameState = {
     essence: 0,
     damageDone: 0,
-    dps: 0,
     bossMaxHP: 100000,
     bossCurrentHP: 100000,
     lastRegenTime: Date.now(),
-    upgrades: [
-        { id: 1, name: "Void Spark", baseCost: 15, cost: 15, owned: 1, manualDamage: 12 },
-        { id: 2, name: "Echo Fragment", baseCost: 70, cost: 70, owned: 0, manualDamage: 45 },
-        { id: 3, name: "Nebula Weaver", baseCost: 320, cost: 320, owned: 0, manualDamage: 160 },
-        { id: 4, name: "Rift Anchor", baseCost: 1100, cost: 1100, owned: 0, manualDamage: 520 },
-        // Añade más cuando quieras equilibrar
-    ],
-    dpsImproves: [
-        { id: 101, upgradeId: 1, name: "Void Spark DPS", level: 0, maxLevel: 5, baseCost: 5000, cost: 5000, multiplier: 0.25 },
-        { id: 201, upgradeId: 2, name: "Echo Fragment DPS", level: 0, maxLevel: 5, baseCost: 20000, cost: 20000, multiplier: 0.35 },
-        // Mejora pasiva que aumenta el multiplicador de DPS pasivo
-    ]
+    upgradesOwned: { 1: 1, 2: 0, 3: 0, 4: 0 },
+    dpsLevels: { 101: 0, 201: 0 }
 };
 
-// ====================== DOM ======================
+// 3. CACHÉ DE ELEMENTOS DOM
 const elements = {
     essence: document.getElementById('essence'),
     damageDone: document.getElementById('damage-done'),
@@ -31,313 +41,194 @@ const elements = {
     dpsMainBtn: document.getElementById('dps-improves-btn'),
     dpsModal: document.getElementById('dps-modal'),
     closeModalBtn: document.getElementById('close-modal-btn'),
-    dpsImprovementsList: document.getElementById('dps-improves-list')
-
+    dpsList: document.getElementById('dps-improves-list')
 };
 
-// ====================== HELPERS ======================
-function formatNumber(num) {
-    return Math.floor(num).toLocaleString('es-ES');
-}
+// 4. UTILIDADES
+const formatNumber = (num) => Math.floor(num).toLocaleString('es-ES');
+const getCost = (base, growth, level) => Math.floor(base * Math.pow(growth, level));
 
-function calculateDPS() {
-    return gameState.dpsImproves.reduce((total, improvement) => {
-        // Solo calculamos si el jugador ha comprado al menos un nivel de esta mejora DPS
-        if (improvement.level > 0) {
-            const baseUpgrade = gameState.upgrades.find(u => u.id === improvement.upgradeId);
-            
-            // Verificamos que el item base exista y que el jugador tenga al menos uno
-            if (baseUpgrade && baseUpgrade.owned > 0) {
-                // Cálculo: (Daño Manual) * (Multiplicador % * Nivel) * (Cantidad de Items)
-                const dpsPorUnidad = baseUpgrade.manualDamage * (improvement.multiplier * improvement.level);
-                // return total + (dpsPorUnidad * baseUpgrade.owned);
-                return total + dpsPorUnidad;
-            }
-        }
-        return total;
+let cachedDPS = 0;
+function updateCachedDPS() {
+    cachedDPS = CONFIG.dpsImprovements.reduce((total, conf) => {
+        const level = gameState.dpsLevels[conf.id] || 0;
+        const owned = gameState.upgradesOwned[conf.upgradeId] || 0;
+        if (level === 0 || owned === 0) return total;
+        const baseUpg = CONFIG.upgrades.find(u => u.id === conf.upgradeId);
+        return total + (baseUpg.manualDamage * conf.multiplier * level * owned);
     }, 0);
 }
 
-function updateBossUI() {
-    // Calculamos el porcentaje con precisión decimal
-    const percent = Math.max(0, (gameState.bossCurrentHP / gameState.bossMaxHP) * 100);
-    
-    // Forzamos el estilo de la barra
-    if (elements.healthFill) {
-        elements.healthFill.style.width = `${percent}%`;
-    }
-    
-    // Usamos toFixed(0) para que el texto de vida no baile con decimales locos
-    if (elements.hpText) {
-        elements.hpText.textContent = `${formatNumber(gameState.bossCurrentHP)} / ${formatNumber(gameState.bossMaxHP)}`;
-    }
-}
-
-function updateUI() {
-    const currentDPS = calculateDPS();
-    gameState.dps = currentDPS; // Guardamos el valor actual en el estado
-
-    elements.essence.textContent = `Essence: ${formatNumber(gameState.essence)}`;
-    elements.damageDone.textContent = `Daño total: ${formatNumber(gameState.damageDone)}`;
-    elements.dps.textContent = `DPS actual: ${currentDPS.toFixed(1)}`;
-
-    // [OPCIONAL] Si el modal está abierto, actualizamos los botones para que se habiliten/deshabiliten
-    if (elements.dpsModal && elements.dpsModal.style.display === 'flex') {
-        const dpsButtons = elements.dpsImprovementsList.querySelectorAll('.dps-buy-btn');
-        dpsButtons.forEach(btn => {
-            const imp = btn.improvementData;
-            btn.disabled = gameState.essence < imp.cost || imp.level >= imp.maxLevel;
-        });
-    }
-
-    updateBossUI();
-}
-
-function getIcon(name) {
-    const icons = {
-        // Upgrades
-        "Void Spark": "✨",
-        "Echo Fragment": "🔊",
-        "Nebula Weaver": "🌌",
-        "Rift Anchor": "🌊",
-        "Stellar Crucible": "⭐",
-        "Quantum Echo": "⟲",
-
-        // Iconos generales
-        "essence": "🌀",
-        "damage": "⚔️",
-        "attack": "💥",
-        "buy": "🛒",
-        "default": "🌑"
-    }
-    return icons[name] || icons["default"];
-}
-
-// ====================== ATTACK ======================
-function attackWithUpgrade(upgrade) {
+// 5. ACCIONES
+function applyDamage(amount) {
     if (gameState.bossCurrentHP <= 0) return;
-
-    const damage = upgrade.manualDamage * upgrade.owned;
-    gameState.bossCurrentHP -= damage;
-    gameState.damageDone += damage;
-    gameState.essence += Math.floor(damage * 0.7); // ganas esencia al atacar manualmente
-
-    if (gameState.bossCurrentHP < 0) gameState.bossCurrentHP = 0;
-
-    updateUI();
-    renderUpgrades()
-    saveGame();
+    gameState.bossCurrentHP = Math.max(0, gameState.bossCurrentHP - amount);
+    gameState.damageDone += amount;
+    gameState.essence += amount * CONFIG.essenceRatio;
 }
 
-// ====================== BUY ======================
-function buyUpgrade(upgrade) {
-    if (!upgrade || gameState.essence < upgrade.cost) {
-        return;
+function handlePurchase(id, isDPS = false) {
+    const conf = isDPS 
+        ? CONFIG.dpsImprovements.find(i => i.id === id)
+        : CONFIG.upgrades.find(u => u.id === id);
+    
+    const level = isDPS ? gameState.dpsLevels[id] : (gameState.upgradesOwned[id] || 0);
+    const cost = getCost(conf.baseCost, isDPS ? CONFIG.growth.dps : CONFIG.growth.upgrade, level);
+
+    if (gameState.essence < cost || (isDPS && level >= conf.maxLevel)) return;
+
+    gameState.essence -= cost;
+    if (isDPS) {
+        gameState.dpsLevels[id]++;
+        renderDPSImprovements(); // El modal siempre se refresca entero
+    } else {
+        gameState.upgradesOwned[id] = (gameState.upgradesOwned[id] || 0) + 1;
+        updateUpgradeCards(); // Actualiza visualmente la card
     }
 
-    gameState.essence -= upgrade.cost;
-    upgrade.owned++;
-    upgrade.cost = Math.floor(upgrade.baseCost * Math.pow(1.18, upgrade.owned));
-
-
-    updateUI();
-    renderUpgrades();
+    updateCachedDPS();
     saveGame();
 }
 
-function buyDPSImprovement(improvement) {
-    if (!improvement || gameState.essence < improvement.cost) return;
-
-    gameState.essence -= improvement.cost;
-    improvement.level++;
-
-    improvement.cost = Math.floor(improvement.baseCost * Math.pow(1.25, improvement.level));
-
-    updateUI();
-    renderDPSImprovements();
-    saveGame();
-
-}
-
-// ====================== RENDER ======================
+// 6. RENDERIZADO REACTIVO
 function renderUpgrades() {
-    elements.upgradesContainer.innerHTML = '';
-
-    gameState.upgrades.forEach(upgrade => {
-        const canAfford = gameState.essence >= upgrade.cost;
-        const isUnlocked = upgrade.owned > 0;
-
-        const div = document.createElement('div');
-        div.className = `upgrade ${isUnlocked ? '' : 'locked'}`;
-
-        div.innerHTML = `
+    elements.upgradesContainer.innerHTML = CONFIG.upgrades.map(conf => `
+        <div id="card-${conf.id}" class="upgrade">
             <div class="upgrade-header">
-                <span class="upgrade-icon">${getIcon(upgrade.name)}</span>
-                <strong>${upgrade.name}</strong>
-                <span class="owned-count">×${upgrade.owned}</span><br>
+                <span>${conf.icon} <strong>${conf.name}</strong></span>
+                <span class="count">×0</span>
             </div>
-
             <div class="upgrade-info">
-                <span class="cost">Coste: <strong>${formatNumber(upgrade.cost)}${getIcon("essence")}</strong>Essence<br></span>
-                <span class="damage">Daño: <strong>${upgrade.manualDamage}${getIcon("damage")}</strong>Damage</span>
+                Coste: <strong class="cost-val">0</strong> Essence
             </div>
-
             <div class="upgrade-buttons">
-            <!-- Boton Comprar -->
-                <button 
-                    class="buy-btn" 
-                    ${canAfford ? '' : 'disabled'}
-                    onclick="buyUpgrade(this.upgradeData)">
-                    COMPRAR
-                </button>
-            <!-- Boton Atacar -->
-                <button 
-                    class="attack-btn"
-                    ${upgrade.owned > 0 ? '' : 'disabled'}
-                    onclick="attackWithUpgrade(this.upgradeData)">
-                    ATACAR
-                </button>
+                <button class="buy-btn" data-id="${conf.id}">COMPRAR</button>
+                <button class="atk-btn" data-atk-id="${conf.id}">ATACAR</button>
             </div>
-        `;
-        div.querySelectorAll('button').forEach(btn => btn.upgradeData = upgrade);
-        elements.upgradesContainer.appendChild(div);
+        </div>
+    `).join('');
+    updateUpgradeCards();
+}
+
+function updateUpgradeCards() {
+    CONFIG.upgrades.forEach(conf => {
+        const card = document.getElementById(`card-${conf.id}`);
+        if (!card) return;
+
+        const owned = gameState.upgradesOwned[conf.id] || 0;
+        const cost = getCost(conf.baseCost, CONFIG.growth.upgrade, owned);
+        
+        card.querySelector('.count').textContent = `×${owned}`;
+        card.querySelector('.cost-val').textContent = formatNumber(cost);
+        card.querySelector('.buy-btn').disabled = gameState.essence < cost;
+        card.querySelector('.atk-btn').disabled = owned === 0;
+        card.classList.toggle('locked', owned === 0);
     });
 }
+
 function renderDPSImprovements() {
-    const container = elements.dpsImprovementsList;
-    if (!container) return;
-
-    container.innerHTML = '';
-
-    gameState.dpsImproves.forEach(improvement => {
-        const item = document.createElement('div');
-        item.className = 'dps-item';
-
-        const currentMultiplier = (improvement.level * improvement.multiplier).toFixed(2);
-
-        item.innerHTML = `
-            <h3>${improvement.name}</h3>
-            <div class="current-level">
-                Nivel: ${improvement.level} / ${improvement.maxLevel} 
-                (${currentMultiplier}x DPS)
-            </div>
-            <div class="dps-info">
-                Coste para siguiente nivel: <strong>${formatNumber(improvement.cost)}</strong> Essence
-            </div>
-            <button 
-                class="dps-buy-btn"
-                ${gameState.essence >= improvement.cost ? '' : 'disabled'}
-                onclick="buyDPSImprovement(this.improvementData)">
-                ${improvement.level === 0 ? 'Activar DPS' : 'Mejorar DPS'}
-            </button>
-        `;
-        item.querySelector('.dps-buy-btn').improvementData = improvement;
-        container.appendChild(item);
-    });
+    elements.dpsList.innerHTML = CONFIG.dpsImprovements.map(conf => {
+        const lvl = gameState.dpsLevels[conf.id] || 0;
+        const cost = getCost(conf.baseCost, CONFIG.growth.dps, lvl);
+        const isMax = lvl >= conf.maxLevel;
+        return `
+            <div class="dps-item">
+                <h3>${conf.name}</h3>
+                <p>Nivel ${lvl}/${conf.maxLevel} (+${(conf.multiplier * 100).toFixed(0)}% por unidad)</p>
+                <button class="dps-buy-btn" data-dps-id="${conf.id}" ${gameState.essence < cost || isMax ? 'disabled' : ''}>
+                    ${isMax ? 'MÁXIMO' : 'MEJORAR: ' + formatNumber(cost)}
+                </button>
+            </div>`;
+    }).join('');
 }
 
-function setupModalListeners() {
-    if (elements.dpsMainBtn) {
-        elements.dpsMainBtn.addEventListener('click', openDPSModal);
+// 7. GAME LOOP (OPTIMIZADO)
+let lastTime = performance.now();
+let lastEssenceInt = -1;
+
+function gameLoop(currentTime) {
+    const delta = (currentTime - lastTime) / 1000;
+    lastTime = currentTime;
+
+    if (cachedDPS > 0) applyDamage(cachedDPS * delta);
+
+    // DIRTY CHECKING: Solo actualiza el DOM pesado si la esencia cambia de unidad
+    const currentEssenceInt = Math.floor(gameState.essence);
+    if (currentEssenceInt !== lastEssenceInt) {
+        updateUpgradeCards();
+        if (elements.dpsModal.style.display === 'flex') renderDPSImprovements();
+        lastEssenceInt = currentEssenceInt;
     }
 
-    if (elements.closeModalBtn) {
-        elements.closeModalBtn.addEventListener('click', closeDPSModal);
-    }
-
-    // Cerrar modal al hacer clic fuera
-    if (elements.dpsModal) {
-        elements.dpsModal.addEventListener('click', (e) => {
-            if (e.target === elements.dpsModal) {
-                closeDPSModal();
-            }
-        });
-    }
-}
-
-
-// ====================== MODAL DPS ======================
-function openDPSModal() {
-
-    if (elements.dpsModal) {
-        elements.dpsModal.style.display = 'flex';
-        renderDPSImprovements();
-    }
-}
-
-function closeDPSModal() {
-    if (elements.dpsModal) {
-        elements.dpsModal.style.display = 'none';
-    }
-}
-
-// ====================== GAME LOOP (Passive DPS) ======================
-let lastTime = Date.now();
-
-function gameLoop() {
-    const now = Date.now();
-    const delta = (now - lastTime) / 1000; // Segundos transcurridos (aprox 0.016)
-    lastTime = now;
-
-    if (gameState.bossCurrentHP > 0) {
-        const dps = calculateDPS();
-
-        if (dps > 0) {
-            const passiveDamage = dps * delta;
-            
-            // 1. Restamos vida
-            gameState.bossCurrentHP -= passiveDamage;
-            gameState.damageDone += passiveDamage;
-
-            // 2. IMPORTANTE: Ganar esencia pasiva 
-            // Si el ataque manual da 0.7, el DPS debería dar algo similar o proporcional
-            gameState.essence += passiveDamage * 0.7; 
-
-            // 3. Control de muerte del Boss
-            if (gameState.bossCurrentHP <= 0) {
-                gameState.bossCurrentHP = 0;
-                // Aquí podrías llamar a una función para generar un nuevo Boss
-            }
-        }
-    }
-
-    updateUI(); // Esto refresca el texto del DPS y la Esencia
-    updateBossUI(); // Esto refresca la barra de vida
+    // Actualización de stats ligeros (cada frame)
+    elements.essence.textContent = formatNumber(gameState.essence);
+    elements.dps.textContent = cachedDPS.toFixed(1);
+    elements.damageDone.textContent = `Total: ${formatNumber(gameState.damageDone)}`;
+    
+    const hpPercent = (gameState.bossCurrentHP / gameState.bossMaxHP) * 100;
+    elements.healthFill.style.width = `${Math.max(0, hpPercent)}%`;
+    elements.hpText.textContent = `${formatNumber(gameState.bossCurrentHP)} / ${formatNumber(gameState.bossMaxHP)}`;
+    
     requestAnimationFrame(gameLoop);
 }
 
-// ====================== REGENERACIÓN ======================
-function checkRegen() {
-    const now = Date.now();
-    if (now - gameState.lastRegenTime > 3600000) { // 1 hora
-        gameState.bossCurrentHP = gameState.bossMaxHP;
-        gameState.lastRegenTime = now;
-    }
+// 8. EVENTOS Y PERSISTENCIA
+const saveGame = () => localStorage.setItem(SAVE_KEY, JSON.stringify(gameState));
+
+function setupListeners() {
+    document.addEventListener('click', (e) => {
+        // Manejo de Compras de Upgrades
+        if (e.target.classList.contains('buy-btn')) {
+            handlePurchase(parseInt(e.target.dataset.id));
+        }
+        
+        // Manejo de Compras de DPS
+        if (e.target.classList.contains('dps-buy-btn')) {
+            handlePurchase(parseInt(e.target.dataset.dpsId), true);
+        }
+
+        // Manejo de Ataque Manual
+        if (e.target.dataset.atkId) {
+            const id = parseInt(e.target.dataset.atkId);
+            const upg = CONFIG.upgrades.find(u => u.id === id);
+            applyDamage(upg.manualDamage * gameState.upgradesOwned[id]);
+            updateUpgradeCards(); // Feedback inmediato
+        }
+    });
+
+    elements.dpsMainBtn.onclick = () => {
+        elements.dpsModal.style.display = 'flex';
+        renderDPSImprovements();
+    };
+
+    elements.closeModalBtn.onclick = () => elements.dpsModal.style.display = 'none';
+    
+    window.onclick = (e) => {
+        if (e.target === elements.dpsModal) elements.dpsModal.style.display = 'none';
+    };
 }
 
-// ====================== SAVE / LOAD ======================
-function saveGame() {
-    localStorage.setItem('eternalVoidSave', JSON.stringify(gameState));
-}
-
-function loadGame() {
-    const saved = localStorage.getItem('eternalVoidSave');
+// 9. INICIALIZACIÓN
+(function init() {
+    const saved = localStorage.getItem(SAVE_KEY);
     if (saved) {
-        const data = JSON.parse(saved);
-        Object.assign(gameState, data);
-        gameState.upgrades.forEach(u => {
-            u.cost = Math.floor(u.baseCost * Math.pow(1.18, u.owned));
-        });
+        try {
+            const parsed = JSON.parse(saved);
+            Object.assign(gameState, parsed);
+        } catch (e) { console.error("Error al cargar partida"); }
     }
-}
 
-// ====================== INIT ======================
-loadGame();
-checkRegen();
-updateUI();
-renderUpgrades();
-setupModalListeners();
-gameLoop();
+    updateCachedDPS();
+    renderUpgrades();
+    setupListeners();
+    requestAnimationFrame(gameLoop);
 
-// Comprobar regeneración cada 30 segundos
-setInterval(checkRegen, 30000);
+    // Auto-regen cada hora
+    setInterval(() => {
+        if (Date.now() - gameState.lastRegenTime > 3600000) {
+            gameState.bossCurrentHP = gameState.bossMaxHP;
+            gameState.lastRegenTime = Date.now();
+            saveGame();
+        }
+    }, 60000);
+})();
