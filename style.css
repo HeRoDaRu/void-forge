@@ -1,112 +1,131 @@
 :root {
-    --bg: #05050a;
-    --card-bg: #0f0f1a;
+    --bg: #05050f;
+    --card-bg: #0d0d1a;
+    --card-border: #1a1a33;
     --accent: #00f0ff;
-    --accent-glow: rgba(0, 240, 255, 0.3);
-    --text: #e0e0ff;
-    --text-dim: #8888aa;
+    --accent-dim: rgba(0, 240, 255, 0.15);
+    --accent-glow: rgba(0, 240, 255, 0.4);
+    --text: #d0d0ff;
+    --text-dim: #6666aa;
     --red: #ff2d55;
+    --red-glow: rgba(255, 45, 85, 0.4);
     --green: #00ff88;
-    --gold: #ffcc00;
+    --gold: #ffcc44;
 }
 
 /* ==================== BASE ==================== */
 body {
     margin: 0;
     height: 100dvh;
+    overflow: hidden;
     background: var(--bg);
     color: var(--text);
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    overflow: hidden;
-    user-select: none;
-    touch-action: manipulation; /* ← anti-zoom móvil */
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
 }
 
 button {
+    touch-action: manipulation;
     cursor: pointer;
-    touch-action: manipulation; /* ← en botones también */
 }
 
 /* ==================== LAYOUT ==================== */
 .game-container {
-    height: 100%;
+    height: 100dvh;
     display: flex;
     flex-direction: column;
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 10px;
+    padding: 12px 16px;
     box-sizing: border-box;
+    max-width: 820px;
+    margin: 0 auto;
+    width: 100%;
 }
 
 .game-area {
-    flex: 1;                  /* ocupa el espacio restante bajo el header */
+    flex: 1;
     display: flex;
     flex-direction: column;
-    min-height: 0;            /* necesario para que flex+overflow funcione en Safari */
-    gap: 10px;
+    min-height: 0;
+    gap: 8px;
 }
 
-/* ==================== HEADER & STATS ==================== */
+/* ==================== HEADER ==================== */
 header {
-    text-align: center;
-    padding: 10px 0;
     flex-shrink: 0;
+    text-align: center;
+    margin-bottom: 10px;
 }
 
 h1 {
-    font-size: 1.5rem;
+    font-size: clamp(1.4rem, 5vw, 2.4rem);
     letter-spacing: 6px;
     margin: 0 0 10px 0;
-    text-shadow: 0 0 10px var(--accent-glow);
+    text-shadow: 0 0 30px var(--accent-glow), 0 0 60px var(--accent-dim);
 }
 
-.accent {
-    color: var(--accent); /* ← faltaba esta clase */
-}
+.accent { color: var(--accent); }
 
+/* ==================== STATS BAR ==================== */
 .stats-bar {
     display: flex;
     justify-content: space-around;
     background: var(--card-bg);
-    padding: 12px;
+    border: 1px solid var(--card-border);
     border-radius: 12px;
-    border: 1px solid #222;
+    padding: 10px 16px;
 }
 
 .stat-item {
     display: flex;
     flex-direction: column;
     align-items: center;
+    gap: 2px;
 }
 
 .stat-item .label {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     color: var(--text-dim);
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 1.5px;
 }
 
 .stat-item strong {
     color: var(--accent);
-    font-size: 1.2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
 }
 
 /* ==================== BOSS ==================== */
 .boss-section {
     flex-shrink: 0;
+    padding: 16px 20px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
     text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.boss-section::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 10%; right: 10%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
 }
 
 #boss-name {
-    font-size: 1rem;
+    font-size: 0.75rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
     color: var(--text-dim);
-    letter-spacing: 2px;
     margin-bottom: 8px;
 }
 
 .boss-visual-wrapper {
-    height: 130px;
+    height: 120px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -114,176 +133,231 @@ h1 {
 
 .boss-visual {
     font-size: 6rem;
-    filter: drop-shadow(0 0 20px var(--accent));
+    filter: drop-shadow(0 0 20px var(--accent-glow));
     animation: void-pulse 4s infinite ease-in-out;
 }
 
 @keyframes void-pulse {
     0%, 100% {
         transform: scale(1);
-        filter: drop-shadow(0 0 20px var(--accent));
+        filter: drop-shadow(0 0 20px var(--accent-glow));
     }
     50% {
-        transform: scale(1.08);
-        filter: drop-shadow(0 0 40px var(--accent));
+        transform: scale(1.06);
+        filter: drop-shadow(0 0 40px var(--accent-glow)) drop-shadow(0 0 80px var(--accent-dim));
     }
 }
 
 .boss-health-bar {
-    height: 10px;
-    background: #111;
-    border-radius: 5px;
+    height: 8px;
+    background: #0a0a14;
+    border-radius: 4px;
     overflow: hidden;
-    margin: 8px 0 4px;
-    border: 1px solid #333;
+    margin: 10px 0 6px;
+    border: 1px solid #2a0020;
 }
 
 .health-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--red), #ff6b6b);
-    box-shadow: 0 0 10px var(--red);
-    transition: width 0.2s ease-out;
+    background: linear-gradient(90deg, var(--red), #ff6b8a);
+    box-shadow: 0 0 12px var(--red-glow);
+    transition: width 0.25s ease-out;
 }
 
 .hp-text {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: var(--text-dim);
+    letter-spacing: 1px;
 }
 
 /* ==================== ACTIONS ==================== */
 .actions-panel {
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    flex-shrink: 0;
+    align-items: center;
+    gap: 6px;
 }
 
 .action-btn-primary {
-    background: var(--accent);
-    color: #000;
-    border: none;
-    padding: 14px;
+    padding: 12px 32px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 1px;
     border-radius: 8px;
-    font-weight: bold;
-    font-size: 1rem;
-    transition: opacity 0.2s;
+    text-transform: uppercase;
+    background: rgba(0, 102, 170, 0.25);
+    color: var(--accent);
+    border: 1px solid rgba(0, 180, 255, 0.35);
+    transition: all 0.2s ease;
+    min-width: 180px;
 }
 
-.action-btn-primary:hover { opacity: 0.85; }
-.action-btn-primary:active { transform: scale(0.98); }
+.action-btn-primary:hover {
+    background: rgba(0, 150, 220, 0.3);
+    border-color: var(--accent);
+    box-shadow: 0 0 16px rgba(0, 180, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+.action-btn-primary:active {
+    transform: scale(0.98);
+}
 
 .total-damage {
-    text-align: center;
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     color: var(--text-dim);
+    letter-spacing: 0.5px;
 }
 
-/* ==================== UPGRADES ==================== */
+/* ==================== UPGRADES SCROLL ==================== */
 .upgrades-scroll {
     flex: 1;
     overflow-y: auto;
-    min-height: 0; /* ← mismo fix Safari que .game-area */
-    padding-right: 4px;
+    min-height: 0;
+    padding: 4px 2px 10px;
+    -webkit-overflow-scrolling: touch;
 }
 
-.upgrades-scroll::-webkit-scrollbar { width: 4px; }
+.upgrades-scroll::-webkit-scrollbar { width: 3px; }
 .upgrades-scroll::-webkit-scrollbar-thumb {
-    background: #333;
+    background: var(--card-border);
     border-radius: 10px;
 }
 
 .upgrades-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    padding-bottom: 10px; /* respiro al final del scroll */
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 10px;
+    width: 100%;
 }
 
+/* ==================== UPGRADE CARD ==================== */
 .upgrade {
     background: var(--card-bg);
-    border: 1px solid #222;
-    padding: 15px;
+    border: 1px solid var(--card-border);
+    padding: 16px 18px;
     border-radius: 12px;
-    display: flex;
-    flex-direction: column;
-    transition: border-color 0.2s;
+    text-align: left;
+    transition: border-color 0.25s, box-shadow 0.25s;
+    position: relative;
+    overflow: hidden;
+}
+
+.upgrade::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(153, 102, 255, 0.4), transparent);
+    opacity: 0;
+    transition: opacity 0.25s;
 }
 
 .upgrade:not(.locked):hover {
-    border-color: #444;
+    border-color: rgba(153, 102, 255, 0.5);
+    box-shadow: 0 4px 24px rgba(100, 60, 200, 0.12);
+}
+
+.upgrade:not(.locked):hover::before {
+    opacity: 1;
 }
 
 .upgrade.locked {
-    opacity: 0.45;
-    filter: grayscale(1);
+    opacity: 0.35;
+    filter: grayscale(0.8);
 }
 
 .upgrade-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 8px;
+    gap: 10px;
+    margin-bottom: 10px;
 }
 
-.upgrade-header span { font-size: 1rem; font-weight: bold; }
+.upgrade-header span { font-size: 1.6rem; }
+
+.upgrade-header strong {
+    font-size: 1.05rem;
+    flex: 1;
+    color: var(--text);
+}
 
 .count {
     color: var(--accent);
-    font-family: monospace;
     font-size: 1.1rem;
+    font-weight: 700;
+    font-family: monospace;
 }
 
 .upgrade-info {
-    font-size: 0.85rem;
+    margin-bottom: 12px;
+    line-height: 1.7;
+    font-size: 0.88rem;
     color: var(--text-dim);
-    margin-bottom: 10px;
-    line-height: 1.6;
 }
 
-.cost-val { color: var(--gold); }
+.cost-val { color: var(--gold); font-weight: 600; }
 
+/* ==================== BOTONES UPGRADE ==================== */
 .upgrade-buttons {
     display: flex;
     gap: 8px;
 }
 
-.buy-btn, .atk-btn {
+.upgrade-buttons button {
     flex: 1;
-    padding: 10px;
-    border: none;
-    border-radius: 6px;
-    font-weight: bold;
-    font-size: 0.9rem;
+    padding: 11px 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    border-radius: 7px;
+    transition: all 0.18s ease;
+    text-transform: uppercase;
 }
 
 .buy-btn {
-    background: #222;
-    color: var(--text);
-    border: 1px solid #444;
+    background: rgba(0, 170, 204, 0.12);
+    color: #00ccff;
+    border: 1px solid rgba(0, 170, 204, 0.3);
 }
 
 .buy-btn:not(:disabled):hover {
-    background: #2a2a3a;
-    border-color: var(--gold);
+    background: rgba(0, 200, 255, 0.2);
+    border-color: rgba(0, 200, 255, 0.6);
+    box-shadow: 0 0 12px rgba(0, 200, 255, 0.12);
+    transform: translateY(-1px);
 }
 
 .buy-btn:disabled {
-    color: #555;
+    background: transparent;
+    color: #2a2a44;
+    border-color: #151525;
     cursor: not-allowed;
 }
 
 .atk-btn {
-    background: var(--green);
-    color: #000;
+    background: rgba(0, 200, 100, 0.12);
+    color: var(--green);
+    border: 1px solid rgba(0, 200, 100, 0.3);
 }
 
 .atk-btn:not(:disabled):hover {
-    opacity: 0.85;
+    background: rgba(0, 220, 120, 0.2);
+    border-color: rgba(0, 220, 120, 0.6);
+    box-shadow: 0 0 12px rgba(0, 200, 100, 0.12);
+    transform: translateY(-1px);
+}
+
+.atk-btn:active {
+    transform: scale(0.96);
+    transition: transform 0.08s;
 }
 
 .atk-btn:disabled {
-    background: #222;
-    color: #555;
+    background: transparent;
+    color: #2a2a44;
+    border-color: #151525;
     cursor: not-allowed;
 }
 
@@ -292,9 +366,9 @@ h1 {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(8px);
-    z-index: 100;
+    background: rgba(3, 3, 12, 0.88);
+    backdrop-filter: blur(6px);
+    z-index: 2000;
     align-items: center;
     justify-content: center;
     padding: 20px;
@@ -303,76 +377,113 @@ h1 {
 
 .modal-content {
     background: var(--card-bg);
+    border: 1px solid rgba(0, 240, 255, 0.2);
+    border-radius: 16px;
     width: 100%;
-    max-width: 400px;
-    max-height: 80vh;        /* ← evita que el modal se salga en móviles pequeños */
+    max-width: 440px;
+    max-height: 80vh;
     overflow-y: auto;
-    border-radius: 20px;
-    border: 1px solid var(--accent);
-    padding: 20px;
-    box-sizing: border-box;
+    box-shadow: 0 0 60px rgba(0, 240, 255, 0.06), 0 20px 40px rgba(0,0,0,0.6);
+    position: relative;
+}
+
+.modal-content::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 10%; right: 10%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
 }
 
 .modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--card-border);
+    position: sticky;
+    top: 0;
+    background: var(--card-bg);
+    z-index: 10;
 }
 
 .modal-header h2 {
     margin: 0;
-    font-size: 1.2rem;
+    font-size: 1rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
     color: var(--accent);
 }
 
 .close-btn {
     background: none;
     border: none;
+    font-size: 1.4rem;
     color: var(--text-dim);
-    font-size: 1.5rem;
-    line-height: 1;
-    padding: 4px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: color 0.2s, background 0.2s;
 }
 
-.close-btn:hover { color: var(--red); }
+.close-btn:hover {
+    color: var(--red);
+    background: rgba(255, 45, 85, 0.1);
+}
 
 .dps-list {
+    padding: 14px;
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
 
 .dps-item {
-    background: #1a1a2e;
-    padding: 15px;
-    border-radius: 12px;
-    border: 1px solid #333;
+    background: #0a0a16;
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 14px 16px;
+}
+
+.dps-item h3 {
+    margin: 0 0 4px 0;
+    font-size: 1rem;
+    color: var(--text);
 }
 
 .dps-item p {
-    margin: 4px 0 0;
-    font-size: 0.85rem;
+    margin: 0 0 10px;
+    font-size: 0.82rem;
     color: var(--text-dim);
+    line-height: 1.5;
 }
 
 .dps-buy-btn {
     width: 100%;
-    margin-top: 10px;
-    padding: 10px;
-    border-radius: 6px;
-    border: none;
-    background: var(--accent);
-    color: #000;
-    font-weight: bold;
-    font-size: 0.95rem;
-    transition: opacity 0.2s;
+    padding: 11px;
+    background: rgba(0, 102, 170, 0.18);
+    color: var(--accent);
+    border: 1px solid rgba(0, 180, 255, 0.25);
+    border-radius: 7px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    transition: all 0.18s ease;
 }
 
-.dps-buy-btn:not(:disabled):hover { opacity: 0.85; }
+.dps-buy-btn:not(:disabled):hover {
+    background: rgba(0, 150, 220, 0.26);
+    border-color: var(--accent);
+    box-shadow: 0 0 14px rgba(0, 200, 255, 0.12);
+}
 
 .dps-buy-btn:disabled {
-    background: #333;       /* ← faltaba el estado desactivado */
-    color: #666;
+    background: transparent;
+    color: #2a2a44;
+    border-color: #151525;
     cursor: not-allowed;
 }
