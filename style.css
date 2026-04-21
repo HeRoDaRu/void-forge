@@ -11,6 +11,7 @@
     --red-glow: rgba(255, 45, 85, 0.4);
     --green: #00ff88;
     --gold: #ffcc44;
+    --orange: #ff9f43;
 }
 
 /* ==================== BASE ==================== */
@@ -129,6 +130,13 @@ h1 {
     display: flex;
     align-items: center;
     justify-content: center;
+    -webkit-user-select: none; /* Safari */
+    -moz-user-select: none;    /* Firefox */
+    -ms-user-select: none;     /* IE10+/Edge */
+    user-select: none;         /* Estándar (Chrome, Opera) */
+    
+    /* También evita que en móviles salga el menú contextual al dejar pulsado */
+    -webkit-touch-callout: none;
 }
 
 .boss-visual {
@@ -155,6 +163,44 @@ h1 {
     overflow: hidden;
     margin: 10px 0 6px;
     border: 1px solid #2a0020;
+}
+.boss-click-hint {
+   position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Centrado absoluto sobre el boss */
+    
+    font-size: 0.8rem;
+    font-weight: 900;
+    letter-spacing: 3px;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.4); /* Fondo sutil para que sea legible sobre cualquier boss */
+    padding: 4px 12px;
+    border-radius: 4px;
+    border: 1px solid var(--accent);
+    
+    pointer-events: none;
+    z-index: 5;
+    animation: hint-pulse 1.5s infinite ease-in-out;
+    white-space: nowrap;
+}
+
+@keyframes hint-pulse {
+   0%, 100% { 
+        transform: translate(-50%, -50%) scale(1); 
+        box-shadow: 0 0 5px var(--accent-glow);
+    }
+    50% { 
+        transform: translate(-50%, -50%) scale(1.1); 
+        box-shadow: 0 0 20px var(--accent-glow);
+        opacity: 1;
+    }
+}
+
+
+.boss-visual-wrapper {
+    cursor: crosshair;
+    position: relative;
 }
 
 .health-fill {
@@ -298,6 +344,7 @@ h1 {
 }
 
 .cost-val { color: var(--gold); font-weight: 600; }
+.damage-val { color: var(--orange); font-weight: 600; }
 
 /* ==================== BOTONES UPGRADE ==================== */
 .upgrade-buttons {
@@ -336,30 +383,7 @@ h1 {
     cursor: not-allowed;
 }
 
-.atk-btn {
-    background: rgba(0, 200, 100, 0.12);
-    color: var(--green);
-    border: 1px solid rgba(0, 200, 100, 0.3);
-}
 
-.atk-btn:not(:disabled):hover {
-    background: rgba(0, 220, 120, 0.2);
-    border-color: rgba(0, 220, 120, 0.6);
-    box-shadow: 0 0 12px rgba(0, 200, 100, 0.12);
-    transform: translateY(-1px);
-}
-
-.atk-btn:active {
-    transform: scale(0.96);
-    transition: transform 0.08s;
-}
-
-.atk-btn:disabled {
-    background: transparent;
-    color: #2a2a44;
-    border-color: #151525;
-    cursor: not-allowed;
-}
 
 /* ==================== MODAL ==================== */
 .modal {
@@ -405,14 +429,40 @@ h1 {
     top: 0;
     background: var(--card-bg);
     z-index: 10;
+    gap: 12px;
 }
 
 .modal-header h2 {
     margin: 0;
-    font-size: 1rem;
+    font-size: 0.90rem;
     letter-spacing: 2px;
     text-transform: uppercase;
     color: var(--accent);
+}
+
+.modal-essence {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    background: rgba(0, 240, 255, 0.06);
+    border: 1px solid rgba(0, 240, 255, 0.15);
+    border-radius: 8px;
+    padding: 6px 12px;
+}
+
+.modal-essence .label {
+    font-size: 0.6rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+.modal-essence strong {
+    color: var(--accent);
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: monospace;
 }
 
 .close-btn {
@@ -486,4 +536,78 @@ h1 {
     color: #2a2a44;
     border-color: #151525;
     cursor: not-allowed;
+}
+
+/* ==================== FEEDBACK DE BOTONES ==================== */
+@keyframes btn-flash-buy {
+    0%   { background: rgba(0, 200, 255, 0.12); border-color: rgba(0, 170, 204, 0.3); }
+    40%  { background: rgba(0, 200, 255, 0.45); border-color: rgba(0, 220, 255, 0.9); box-shadow: 0 0 20px rgba(0, 200, 255, 0.4); }
+    100% { background: rgba(0, 200, 255, 0.12); border-color: rgba(0, 170, 204, 0.3); }
+}
+
+@keyframes btn-flash-dps {
+    0%   { background: rgba(0, 102, 170, 0.18); border-color: rgba(0, 180, 255, 0.25); }
+    40%  { background: rgba(0, 180, 255, 0.4);  border-color: var(--accent); box-shadow: 0 0 20px rgba(0, 180, 255, 0.35); }
+    100% { background: rgba(0, 102, 170, 0.18); border-color: rgba(0, 180, 255, 0.25); }
+}
+
+@keyframes btn-bounce {
+    0%   { transform: scale(1); }
+    35%  { transform: scale(0.88); }
+    70%  { transform: scale(1.06); }
+    100% { transform: scale(1); }
+}
+
+.buy-btn.clicked {
+    animation: btn-bounce 0.22s ease, btn-flash-buy 0.3s ease;
+}
+
+.dps-buy-btn.clicked {
+    animation: btn-bounce 0.22s ease, btn-flash-dps 0.3s ease;
+}
+
+/* ==================== BOSS CLICKABLE ==================== */
+.boss-visual-wrapper {
+    cursor: pointer;
+    border-radius: 50%;
+    transition: transform 0.1s ease;
+}
+
+.boss-visual-wrapper:active {
+    transform: scale(0.92);
+}
+
+@keyframes boss-hit {
+    0%   { filter: drop-shadow(0 0 20px var(--accent-glow)); }
+    30%  { filter: drop-shadow(0 0 50px rgba(255, 45, 85, 0.9)) drop-shadow(0 0 30px rgba(255, 100, 100, 0.6)); }
+    100% { filter: drop-shadow(0 0 20px var(--accent-glow)); }
+}
+
+@keyframes boss-bounce {
+    0%   { transform: scale(1); }
+    25%  { transform: scale(0.88) rotate(-3deg); }
+    60%  { transform: scale(1.08) rotate(2deg); }
+    100% { transform: scale(1) rotate(0deg); }
+}
+
+.boss-visual.hit {
+    animation: boss-bounce 0.25s ease, boss-hit 0.35s ease;
+}
+
+/* Número de daño flotante */
+@keyframes damage-float {
+    0%   { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-60px) scale(0.8); }
+}
+
+.damage-number {
+    position: absolute;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--red);
+    text-shadow: 0 0 10px var(--red-glow);
+    pointer-events: none;
+    animation: damage-float 0.8s ease forwards;
+    z-index: 10;
+    font-family: monospace;
 }

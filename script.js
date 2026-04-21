@@ -3,29 +3,28 @@
 // ======================================================
 
 // 1. CONFIGURACIÓN
-const SAVE_KEY = 'eternalVoidSave_v3';
 const CONFIG = {
     upgrades: [
         { id: 1, name: "Void Spark", icon: "✨", baseCost: 15, manualDamage: 12 },
-        { id: 2, name: "Echo Fragment", icon: "🔊", baseCost: 70, manualDamage: 45 },
-        { id: 3, name: "Nebula Weaver", icon: "🌌", baseCost: 320, manualDamage: 160 },
-        { id: 4, name: "Rift Anchor", icon: "🌊", baseCost: 1100, manualDamage: 520 },
+        { id: 2, name: "Echo Fragment", icon: "🔊", baseCost: 2000, manualDamage: 45 },
+        { id: 3, name: "Nebula Weaver", icon: "🌌", baseCost: 85000, manualDamage: 160 },
+        { id: 4, name: "Rift Anchor", icon: "🌊", baseCost: 3500000, manualDamage: 520 },
     ],
     dpsImprovements: [
-        { id: 101, upgradeId: 1, name: "Void Spark DPS", maxLevel: 5, baseCost: 500, multiplier: 0.25 },
-        { id: 201, upgradeId: 2, name: "Echo Fragment DPS", maxLevel: 5, baseCost: 2500, multiplier: 0.35 },
-        { id: 301, upgradeId: 3, name: "Nebula Weaver DPS", maxLevel: 5, baseCost: 7250, multiplier: 0.75 },
-        { id: 401, upgradeId: 4, name: "Rift Anchor DPS", maxLevel: 5, baseCost: 12500, multiplier: 1.15 },
+        { id: 101, upgradeId: 1, name: "Void Spark DPS", maxLevel: 5, baseCost: 8000, multiplier: 0.25 },
+        { id: 201, upgradeId: 2, name: "Echo Fragment DPS", maxLevel: 5, baseCost: 120000, multiplier: 0.35 },
+        { id: 301, upgradeId: 3, name: "Nebula Weaver DPS", maxLevel: 5, baseCost: 2000000, multiplier: 0.75 },
+        { id: 401, upgradeId: 4, name: "Rift Anchor DPS", maxLevel: 5, baseCost: 8000000, multiplier: 1.15 },
     ],
     bosses: [
-        { id: 1, name: "The Void Wraith", icon: "👻", baseHP: 100000, essenceReward: 500 },
-        { id: 2, name: "Nebula Devourer", icon: "🌌", baseHP: 250000, essenceReward: 1500 },
-        { id: 3, name: "Rift Colossus", icon: "🌊", baseHP: 600000, essenceReward: 4000 },
-        { id: 4, name: "The Event Horizon", icon: "🌑", baseHP: 1500000, essenceReward: 12000, isFinal: true },
+        { id: 1, name: "The Void Wraith", icon: "👻", baseHP: 100000, essenceReward: 300 },
+        { id: 2, name: "Nebula Devourer", icon: "🌌", baseHP: 500000, essenceReward: 1200 },
+        { id: 3, name: "Rift Colossus", icon: "🌊", baseHP: 2000000, essenceReward: 6000 },
+        { id: 4, name: "The Event Horizon", icon: "🌑", baseHP: 10000000, essenceReward: 35000, isFinal: true },
     ],
     scalingPerLoop: 2.2,
-    growth: { upgrade: 1.18, dps: 1.25 },
-    essenceRatio: 0.7
+    growth: { upgrade: 1.38, dps: 1.30 },
+    essenceRatio: 0.5
 };
 
 // 2. ESTADO
@@ -36,9 +35,12 @@ const gameState = {
     loopCount: 0,
     bossMaxHP: 100000,
     bossCurrentHP: 100000,
-    lastRegenTime: Date.now(),
-    upgradesOwned: { 1: 1, 2: 0, 3: 0, 4: 0 },
-    dpsLevels: { 101: 0, 201: 0, 301: 0, 401: 0 }
+    upgradesOwned: Object.fromEntries(
+        CONFIG.upgrades.map((u, i) => [u.id, i === 0 ? 1 : 0]) //
+    ),
+    dpsLevels: Object.fromEntries(
+        CONFIG.dpsImprovements.map(d => [d.id, 0])
+    ),
 };
 
 // 3. DOM
@@ -56,6 +58,21 @@ const elements = {
 };
 
 // 4. UTILIDADES
+function getConfigHash() {
+    const str = JSON.stringify({
+        upgrades: CONFIG.upgrades.map(u => ({ id: u.id, baseCost: u.baseCost })),
+        dpsImprovements: CONFIG.dpsImprovements.map(d => ({ id: d.id, baseCost: d.baseCost })),
+        bosses: CONFIG.bosses.map(b => ({ id: b.id, baseHP: b.baseHP })),
+    });
+    // Hash simple pero suficiente
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = ((hash << 5) - hash) + str.charCodeAt(i);
+        hash |= 0;
+    }
+    return Math.abs(hash).toString(36); // ej: "1k4zx9"
+}
+
 const formatNumber = (num) => Math.floor(num).toLocaleString('es-ES');
 const getCost = (base, growth, level) => Math.floor(base * Math.pow(growth, level));
 
@@ -72,6 +89,13 @@ function updateCachedDPS() {
 
 function getBossHP(bossConfig) {
     return Math.floor(bossConfig.baseHP * Math.pow(CONFIG.scalingPerLoop, gameState.loopCount));
+}
+
+function triggerButtonFeedback(btn) {
+    btn.classList.remove('clicked')
+    void btn.offsetWidth;
+    btn.classList.add('clicked');
+    btn.addEventListener('animationend', () => btn.classList.remove('clicked'), { once: true });
 }
 
 // 5. ACCIONES
@@ -99,7 +123,7 @@ function handlePurchase(id, isDPS = false) {
     gameState.essence -= cost;
     if (isDPS) {
         gameState.dpsLevels[id]++;
-        renderDPSImprovements();
+        updateDPSCards();
     } else {
         gameState.upgradesOwned[id] = (gameState.upgradesOwned[id] || 0) + 1;
         updateUpgradeCards();
@@ -133,6 +157,13 @@ function onBossDeath() {
     saveGame();
 }
 
+function calculateManualDamage() {
+    return CONFIG.upgrades.reduce((total, conf) => {
+        const owned = gameState.upgradesOwned[conf.id] || 0;
+        return total + (conf.manualDamage * owned);
+    }, 0);
+}
+
 // 6. RENDER
 function renderUpgrades() {
     elements.upgradesContainer.innerHTML = CONFIG.upgrades.map(conf => `
@@ -142,11 +173,11 @@ function renderUpgrades() {
                 <span class="count">×0</span>
             </div>
             <div class="upgrade-info">
-                Coste: <strong class="cost-val">0</strong> Essence
+                Coste: <strong class="cost-val">0</strong> Essence<br>
+                Damage: <strong class="damage-val">0</strong> Dmg
             </div>
             <div class="upgrade-buttons">
                 <button class="buy-btn" data-id="${conf.id}">COMPRAR</button>
-                <button class="atk-btn" data-atk-id="${conf.id}">ATACAR</button>
             </div>
         </div>
     `).join('');
@@ -164,27 +195,56 @@ function updateUpgradeCards() {
 
         card.querySelector('.count').textContent = `×${owned}`;
         card.querySelector('.cost-val').textContent = formatNumber(cost);
+        card.querySelector('.damage-val').textContent = formatNumber(conf.manualDamage * owned);
         card.querySelector('.buy-btn').disabled = !canAfford;
-        card.querySelector('.atk-btn').disabled = owned === 0;
 
         card.classList.toggle('locked', owned === 0 && !canAfford);
     });
 }
 
 function renderDPSImprovements() {
-    elements.dpsList.innerHTML = CONFIG.dpsImprovements.map(conf => {
+    elements.dpsList.innerHTML = CONFIG.dpsImprovements.map(conf => `
+        <div class="dps-item" id="dps-card-${conf.id}">
+            <h3>${conf.name}</h3>
+            <p class="dps-level"></p>
+            <button class="dps-buy-btn" data-dps-id="${conf.id}"></button>
+        </div>
+    `).join('');
+    updateDPSCards();
+}
+
+function updateDPSCards() {
+    CONFIG.dpsImprovements.forEach(conf => {
+        const card = document.getElementById(`dps-card-${conf.id}`);
+        if (!card) return;
+
         const lvl = gameState.dpsLevels[conf.id] || 0;
         const cost = getCost(conf.baseCost, CONFIG.growth.dps, lvl);
         const isMax = lvl >= conf.maxLevel;
-        return `
-            <div class="dps-item">
-                <h3>${conf.name}</h3>
-                <p>Nivel ${lvl}/${conf.maxLevel} (+${(conf.multiplier * 100).toFixed(0)}% por unidad)</p>
-                <button class="dps-buy-btn" data-dps-id="${conf.id}" ${gameState.essence < cost || isMax ? 'disabled' : ''}>
-                    ${isMax ? 'MÁXIMO' : 'MEJORAR: ' + formatNumber(cost)}
-                </button>
-            </div>`;
-    }).join('');
+
+        card.querySelector('.dps-level').textContent =
+            `Nivel ${lvl}/${conf.maxLevel} (+${(conf.multiplier * 100).toFixed(0)}% por unidad)`;
+
+        const btn = card.querySelector('.dps-buy-btn');
+        btn.textContent = isMax ? 'MÁXIMO' : 'MEJORAR: ' + formatNumber(cost);
+        btn.disabled = gameState.essence < cost || isMax;
+    });
+}
+
+function spawnDamageNumber(damage, event) {
+    const wrapper = document.querySelector('.boss-visual-wrapper');
+    const rect = wrapper.getBoundingClientRect();
+
+    const el = document.createElement('span');
+    el.className = 'damage-number';
+    el.textContent = `-${formatNumber(damage)}`;
+
+    el.style.left = `${20 + Math.random() * 60}%`;
+    el.style.top = '30%'
+
+    wrapper.style.position = 'relative';
+    wrapper.appendChild(el);
+    el.addEventListener('animationend', () => el.remove(), { once: true });
 }
 
 // 7. GAME LOOP
@@ -203,13 +263,20 @@ function render() {
         lastEssenceInt = currentEssenceInt;
     }
 
-    elements.essence.textContent    = formatNumber(gameState.essence);
-    elements.dps.textContent        = cachedDPS.toFixed(1);
+    elements.essence.textContent = formatNumber(gameState.essence);
+    elements.dps.textContent = cachedDPS.toFixed(1);
     elements.damageDone.textContent = `${formatNumber(gameState.damageDone)}`;
 
     const hpPercent = (gameState.bossCurrentHP / gameState.bossMaxHP) * 100;
     elements.healthFill.style.width = `${Math.max(0, hpPercent)}%`;
-    elements.hpText.textContent     = `${formatNumber(gameState.bossCurrentHP)} / ${formatNumber(gameState.bossMaxHP)}`;
+    elements.hpText.textContent = `${formatNumber(gameState.bossCurrentHP)} / ${formatNumber(gameState.bossMaxHP)}`;
+
+    const loopEl = document.getElementById('loop-count');
+    if (loopEl) loopEl.textContent = gameState.loopCount;
+
+    if (elements.dpsModal.style.display === 'flex') {
+        document.getElementById('modal-essence').textContent = formatNumber(gameState.essence);
+    }
 }
 
 function gameLoop(currentTime) {
@@ -224,30 +291,54 @@ function gameLoop(currentTime) {
 
 // 8. EVENTOS
 function setupListeners() {
-    // Un solo listener para todo — compras, DPS y ataques
     document.addEventListener('click', (e) => {
         if (e.target.classList.contains('buy-btn')) {
             handlePurchase(parseInt(e.target.dataset.id));
+            triggerButtonFeedback(e.target);
         }
         if (e.target.classList.contains('dps-buy-btn')) {
             handlePurchase(parseInt(e.target.dataset.dpsId), true);
+            triggerButtonFeedback(e.target);
         }
-        if (e.target.dataset.atkId) {
-            const id = parseInt(e.target.dataset.atkId);
-            const upg = CONFIG.upgrades.find(u => u.id === id);
-            applyDamage(upg.manualDamage * (gameState.upgradesOwned[id] || 0));
-            updateUpgradeCards();
-            saveGame(); // ← bug corregido: el ataque ahora también guarda
-        }
-        // Cerrar modal al hacer click fuera — unificado aquí
         if (e.target === elements.dpsModal) {
             elements.dpsModal.style.display = 'none';
         }
+        
+    });
+
+    
+    document.getElementById('boss-visual').addEventListener('click', (e) => {
+        const damage = calculateManualDamage();
+        if (damage === 0) return;
+
+        const hint = document.getElementById('click-hint');
+        if (hint) {
+            if (gameState.damageDone > 50) {
+                hint.style.display = 'none';
+            }
+        }
+
+        applyDamage(damage);
+        updateUpgradeCards();
+        saveGame();
+
+        const bossEl = document.getElementById('boss-visual');
+        bossEl.classList.remove('hit');
+        void bossEl.offsetWidth;
+        bossEl.classList.add('hit');
+        bossEl.addEventListener('animationend', () => bossEl.classList.remove('hit'), { once: true });
+
+        spawnDamageNumber(damage, e);
     });
 
     elements.dpsMainBtn.onclick = () => {
         elements.dpsModal.style.display = 'flex';
-        renderDPSImprovements();
+        const alreadyRendered = document.getElementById(`dps-card-${CONFIG.dpsImprovements[0].id}`);
+        if (alreadyRendered) {
+            updateDPSCards();
+        } else {
+            renderDPSImprovements();
+        }
     };
 
     elements.closeModalBtn.onclick = () => {
@@ -256,14 +347,16 @@ function setupListeners() {
 }
 
 // 9. SAVE / LOAD
-const saveGame = () => localStorage.setItem(SAVE_KEY, JSON.stringify(gameState));
-
+const SAVE_KEY = `eternalVoidSave_${getConfigHash()}`;
+const saveGame = () => {
+    const { bossMaxHP, bossCurrentHP, ...toSave } = gameState
+    localStorage.setItem(SAVE_KEY, JSON.stringify(toSave));
+};
 function loadGame() {
     try {
         const saved = localStorage.getItem(SAVE_KEY);
         if (!saved) return;
         const data = JSON.parse(saved);
-        // Merge selectivo — solo keys que ya existen en gameState
         Object.keys(gameState).forEach(key => {
             if (data[key] !== undefined) gameState[key] = data[key];
         });

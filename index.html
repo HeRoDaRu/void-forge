@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Void Forge</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <div class="game-container">
         <header>
@@ -23,6 +25,7 @@
                 <div id="boss-name">The Event Horizon</div>
                 <div class="boss-visual-wrapper">
                     <div id="boss-visual" class="boss-visual">🌑</div>
+                    <div id="click-hint" class="boss-click-hint">Click para atacar</div>
                 </div>
                 <div class="hp-container">
                     <div class="boss-health-bar">
@@ -46,6 +49,10 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2>⚡ Mejoras Auto Ataque</h2>
+                <div class="modal-essence">
+                    <span class="label">Essence</span>
+                    <strong id="modal-essence">0</strong>
+                </div>
                 <button id="close-modal-btn" class="close-btn">✕</button>
             </div>
             <div id="dps-improves-list" class="dps-list"></div>
@@ -54,4 +61,5 @@
 
     <script src="script.js"></script>
 </body>
+
 </html>
