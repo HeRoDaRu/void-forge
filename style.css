@@ -11,6 +11,7 @@
     --red-glow: rgba(255, 45, 85, 0.4);
     --green: #00ff88;
     --gold: #ffcc44;
+    --orange: #ff9f43;
 }
 
 /* ==================== BASE ==================== */
@@ -129,6 +130,13 @@ h1 {
     display: flex;
     align-items: center;
     justify-content: center;
+    -webkit-user-select: none; /* Safari */
+    -moz-user-select: none;    /* Firefox */
+    -ms-user-select: none;     /* IE10+/Edge */
+    user-select: none;         /* Estándar (Chrome, Opera) */
+    
+    /* También evita que en móviles salga el menú contextual al dejar pulsado */
+    -webkit-touch-callout: none;
 }
 
 .boss-visual {
@@ -155,6 +163,44 @@ h1 {
     overflow: hidden;
     margin: 10px 0 6px;
     border: 1px solid #2a0020;
+}
+.boss-click-hint {
+   position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Centrado absoluto sobre el boss */
+    
+    font-size: 0.8rem;
+    font-weight: 900;
+    letter-spacing: 3px;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.4); /* Fondo sutil para que sea legible sobre cualquier boss */
+    padding: 4px 12px;
+    border-radius: 4px;
+    border: 1px solid var(--accent);
+    
+    pointer-events: none;
+    z-index: 5;
+    animation: hint-pulse 1.5s infinite ease-in-out;
+    white-space: nowrap;
+}
+
+@keyframes hint-pulse {
+   0%, 100% { 
+        transform: translate(-50%, -50%) scale(1); 
+        box-shadow: 0 0 5px var(--accent-glow);
+    }
+    50% { 
+        transform: translate(-50%, -50%) scale(1.1); 
+        box-shadow: 0 0 20px var(--accent-glow);
+        opacity: 1;
+    }
+}
+
+
+.boss-visual-wrapper {
+    cursor: crosshair;
+    position: relative;
 }
 
 .health-fill {
@@ -298,6 +344,7 @@ h1 {
 }
 
 .cost-val { color: var(--gold); font-weight: 600; }
+.damage-val { color: var(--orange); font-weight: 600; }
 
 /* ==================== BOTONES UPGRADE ==================== */
 .upgrade-buttons {
@@ -336,30 +383,7 @@ h1 {
     cursor: not-allowed;
 }
 
-.atk-btn {
-    background: rgba(0, 200, 100, 0.12);
-    color: var(--green);
-    border: 1px solid rgba(0, 200, 100, 0.3);
-}
 
-.atk-btn:not(:disabled):hover {
-    background: rgba(0, 220, 120, 0.2);
-    border-color: rgba(0, 220, 120, 0.6);
-    box-shadow: 0 0 12px rgba(0, 200, 100, 0.12);
-    transform: translateY(-1px);
-}
-
-.atk-btn:active {
-    transform: scale(0.96);
-    transition: transform 0.08s;
-}
-
-.atk-btn:disabled {
-    background: transparent;
-    color: #2a2a44;
-    border-color: #151525;
-    cursor: not-allowed;
-}
 
 /* ==================== MODAL ==================== */
 .modal {

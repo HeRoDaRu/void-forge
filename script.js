@@ -5,21 +5,21 @@
 // 1. CONFIGURACIÓN
 const CONFIG = {
     upgrades: [
-        { id: 1, name: "Void Spark",    icon: "✨", baseCost: 15,      manualDamage: 12  },
-        { id: 2, name: "Echo Fragment", icon: "🔊", baseCost: 2000,    manualDamage: 45  },
-        { id: 3, name: "Nebula Weaver", icon: "🌌", baseCost: 85000,   manualDamage: 160 },
-        { id: 4, name: "Rift Anchor",   icon: "🌊", baseCost: 3500000, manualDamage: 520 },
+        { id: 1, name: "Void Spark", icon: "✨", baseCost: 15, manualDamage: 12 },
+        { id: 2, name: "Echo Fragment", icon: "🔊", baseCost: 2000, manualDamage: 45 },
+        { id: 3, name: "Nebula Weaver", icon: "🌌", baseCost: 85000, manualDamage: 160 },
+        { id: 4, name: "Rift Anchor", icon: "🌊", baseCost: 3500000, manualDamage: 520 },
     ],
     dpsImprovements: [
-        { id: 101, upgradeId: 1, name: "Void Spark DPS",    maxLevel: 5, baseCost: 8000,    multiplier: 0.25 },
-        { id: 201, upgradeId: 2, name: "Echo Fragment DPS", maxLevel: 5, baseCost: 120000,  multiplier: 0.35 },
+        { id: 101, upgradeId: 1, name: "Void Spark DPS", maxLevel: 5, baseCost: 8000, multiplier: 0.25 },
+        { id: 201, upgradeId: 2, name: "Echo Fragment DPS", maxLevel: 5, baseCost: 120000, multiplier: 0.35 },
         { id: 301, upgradeId: 3, name: "Nebula Weaver DPS", maxLevel: 5, baseCost: 2000000, multiplier: 0.75 },
-        { id: 401, upgradeId: 4, name: "Rift Anchor DPS",   maxLevel: 5, baseCost: 8000000, multiplier: 1.15 },
+        { id: 401, upgradeId: 4, name: "Rift Anchor DPS", maxLevel: 5, baseCost: 8000000, multiplier: 1.15 },
     ],
     bosses: [
-        { id: 1, name: "The Void Wraith",   icon: "👻", baseHP: 100000,   essenceReward: 300    },
-        { id: 2, name: "Nebula Devourer",   icon: "🌌", baseHP: 500000,   essenceReward: 1200   },
-        { id: 3, name: "Rift Colossus",     icon: "🌊", baseHP: 2000000,  essenceReward: 6000   },
+        { id: 1, name: "The Void Wraith", icon: "👻", baseHP: 100000, essenceReward: 300 },
+        { id: 2, name: "Nebula Devourer", icon: "🌌", baseHP: 500000, essenceReward: 1200 },
+        { id: 3, name: "Rift Colossus", icon: "🌊", baseHP: 2000000, essenceReward: 6000 },
         { id: 4, name: "The Event Horizon", icon: "🌑", baseHP: 10000000, essenceReward: 35000, isFinal: true },
     ],
     scalingPerLoop: 2.2,
@@ -35,7 +35,7 @@ const gameState = {
     loopCount: 0,
     bossMaxHP: 100000,
     bossCurrentHP: 100000,
-     upgradesOwned: Object.fromEntries(
+    upgradesOwned: Object.fromEntries(
         CONFIG.upgrades.map((u, i) => [u.id, i === 0 ? 1 : 0]) //
     ),
     dpsLevels: Object.fromEntries(
@@ -60,9 +60,9 @@ const elements = {
 // 4. UTILIDADES
 function getConfigHash() {
     const str = JSON.stringify({
-        upgrades:        CONFIG.upgrades.map(u => ({ id: u.id, baseCost: u.baseCost })),
+        upgrades: CONFIG.upgrades.map(u => ({ id: u.id, baseCost: u.baseCost })),
         dpsImprovements: CONFIG.dpsImprovements.map(d => ({ id: d.id, baseCost: d.baseCost })),
-        bosses:          CONFIG.bosses.map(b => ({ id: b.id, baseHP: b.baseHP })),
+        bosses: CONFIG.bosses.map(b => ({ id: b.id, baseHP: b.baseHP })),
     });
     // Hash simple pero suficiente
     let hash = 0;
@@ -89,6 +89,13 @@ function updateCachedDPS() {
 
 function getBossHP(bossConfig) {
     return Math.floor(bossConfig.baseHP * Math.pow(CONFIG.scalingPerLoop, gameState.loopCount));
+}
+
+function triggerButtonFeedback(btn) {
+    btn.classList.remove('clicked')
+    void btn.offsetWidth;
+    btn.classList.add('clicked');
+    btn.addEventListener('animationend', () => btn.classList.remove('clicked'), { once: true });
 }
 
 // 5. ACCIONES
@@ -150,6 +157,13 @@ function onBossDeath() {
     saveGame();
 }
 
+function calculateManualDamage() {
+    return CONFIG.upgrades.reduce((total, conf) => {
+        const owned = gameState.upgradesOwned[conf.id] || 0;
+        return total + (conf.manualDamage * owned);
+    }, 0);
+}
+
 // 6. RENDER
 function renderUpgrades() {
     elements.upgradesContainer.innerHTML = CONFIG.upgrades.map(conf => `
@@ -159,11 +173,11 @@ function renderUpgrades() {
                 <span class="count">×0</span>
             </div>
             <div class="upgrade-info">
-                Coste: <strong class="cost-val">0</strong> Essence
+                Coste: <strong class="cost-val">0</strong> Essence<br>
+                Damage: <strong class="damage-val">0</strong> Dmg
             </div>
             <div class="upgrade-buttons">
                 <button class="buy-btn" data-id="${conf.id}">COMPRAR</button>
-                <button class="atk-btn" data-atk-id="${conf.id}">ATACAR</button>
             </div>
         </div>
     `).join('');
@@ -181,8 +195,8 @@ function updateUpgradeCards() {
 
         card.querySelector('.count').textContent = `×${owned}`;
         card.querySelector('.cost-val').textContent = formatNumber(cost);
+        card.querySelector('.damage-val').textContent = formatNumber(conf.manualDamage * owned);
         card.querySelector('.buy-btn').disabled = !canAfford;
-        card.querySelector('.atk-btn').disabled = owned === 0;
 
         card.classList.toggle('locked', owned === 0 && !canAfford);
     });
@@ -215,6 +229,22 @@ function updateDPSCards() {
         btn.textContent = isMax ? 'MÁXIMO' : 'MEJORAR: ' + formatNumber(cost);
         btn.disabled = gameState.essence < cost || isMax;
     });
+}
+
+function spawnDamageNumber(damage, event) {
+    const wrapper = document.querySelector('.boss-visual-wrapper');
+    const rect = wrapper.getBoundingClientRect();
+
+    const el = document.createElement('span');
+    el.className = 'damage-number';
+    el.textContent = `-${formatNumber(damage)}`;
+
+    el.style.left = `${20 + Math.random() * 60}%`;
+    el.style.top = '30%'
+
+    wrapper.style.position = 'relative';
+    wrapper.appendChild(el);
+    el.addEventListener('animationend', () => el.remove(), { once: true });
 }
 
 // 7. GAME LOOP
@@ -261,30 +291,48 @@ function gameLoop(currentTime) {
 
 // 8. EVENTOS
 function setupListeners() {
-    // Un solo listener para todo — compras, DPS y ataques
     document.addEventListener('click', (e) => {
         if (e.target.classList.contains('buy-btn')) {
             handlePurchase(parseInt(e.target.dataset.id));
+            triggerButtonFeedback(e.target);
         }
         if (e.target.classList.contains('dps-buy-btn')) {
             handlePurchase(parseInt(e.target.dataset.dpsId), true);
+            triggerButtonFeedback(e.target);
         }
-        if (e.target.dataset.atkId) {
-            const id = parseInt(e.target.dataset.atkId);
-            const upg = CONFIG.upgrades.find(u => u.id === id);
-            applyDamage(upg.manualDamage * (gameState.upgradesOwned[id] || 0));
-            updateUpgradeCards();
-            saveGame(); // ← bug corregido: el ataque ahora también guarda
-        }
-        // Cerrar modal al hacer click fuera — unificado aquí
         if (e.target === elements.dpsModal) {
             elements.dpsModal.style.display = 'none';
         }
+        
+    });
+
+    
+    document.getElementById('boss-visual').addEventListener('click', (e) => {
+        const damage = calculateManualDamage();
+        if (damage === 0) return;
+
+        const hint = document.getElementById('click-hint');
+        if (hint) {
+            if (gameState.damageDone > 50) {
+                hint.style.display = 'none';
+            }
+        }
+
+        applyDamage(damage);
+        updateUpgradeCards();
+        saveGame();
+
+        const bossEl = document.getElementById('boss-visual');
+        bossEl.classList.remove('hit');
+        void bossEl.offsetWidth;
+        bossEl.classList.add('hit');
+        bossEl.addEventListener('animationend', () => bossEl.classList.remove('hit'), { once: true });
+
+        spawnDamageNumber(damage, e);
     });
 
     elements.dpsMainBtn.onclick = () => {
         elements.dpsModal.style.display = 'flex';
-        // Si las cards ya existen, solo actualiza. Si no, construye.
         const alreadyRendered = document.getElementById(`dps-card-${CONFIG.dpsImprovements[0].id}`);
         if (alreadyRendered) {
             updateDPSCards();
