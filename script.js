@@ -36,12 +36,14 @@ const CONFIG = {
 // 2. ESTADO
 const gameState = {
     essence: 0,
+    shards: 0,
     damageDone: 0,
     bossIndex: 0,
     loopCount: 0,
     bossMaxHP: 100000,
     bossCurrentHP: 100000,
     hintDismissed: false,
+    trialActive: false,
     upgradesOwned: Object.fromEntries(
         CONFIG.upgrades.map((u, i) => [u.id, i === 0 ? 1 : 0]) //
     ),
@@ -59,6 +61,7 @@ const elements = {
     hpText: document.getElementById('boss-hp-text'),
     upgradesContainer: document.getElementById('upgrades'),
     dpsMainBtn: document.getElementById('dps-improves-btn'),
+    bossTrialsBtn: document.getElementById('boss-trials-btn'),
     dpsModal: document.getElementById('dps-modal'),
     closeModalBtn: document.getElementById('close-modal-btn'),
     dpsList: document.getElementById('dps-improves-list')
@@ -153,8 +156,11 @@ function onBossDeath() {
     const bossConfig = CONFIG.bosses[gameState.bossIndex];
 
     gameState.essence += bossConfig.essenceReward * (gameState.loopCount + 1);
-    gameState.bossIndex++;
 
+    const shards = CONFIG.trialMode.shardsPerBoss[gameState.bossIndex] || 0;
+    gameState.shards += shards;
+
+    gameState.bossIndex++;
     if (gameState.bossIndex >= CONFIG.bosses.length) {
         gameState.bossIndex = 0;
         gameState.loopCount++;
@@ -284,6 +290,9 @@ function render() {
     if (elements.dpsModal.style.display === 'flex') {
         document.getElementById('modal-essence').textContent = formatNumber(gameState.essence);
     }
+
+    updateShardDisplay();
+
 }
 
 function gameLoop(currentTime) {
@@ -295,6 +304,120 @@ function gameLoop(currentTime) {
 
     requestAnimationFrame(gameLoop);
 }
+
+// ====================== TRIAL MODE ======================
+
+// Boss del trial — se genera al abrir el modal
+let currentTrialBoss = null;
+
+function generateTrialBoss() {
+    const manualDamage = calculateManualDamage();
+    const [minMult, maxMult] = CONFIG.trialMode.difficultyRange;
+    const multiplier = minMult + Math.random() * (maxMult - minMult);
+
+    // HP del trial = tu daño manual × multiplicador aleatorio
+    const hp = Math.floor(manualDamage * multiplier);
+
+    // Boss visual aleatorio de la lista de bosses normales
+    const randomBoss = CONFIG.bosses[Math.floor(Math.random() * CONFIG.bosses.length)];
+
+    currentTrialBoss = {
+        name: `${randomBoss.name} — Trial`,
+        icon: randomBoss.icon,
+        hp,
+        multiplier: parseFloat(multiplier.toFixed(2)),
+    };
+}
+
+function openTrialModal() {
+    generateTrialBoss();
+
+    const manualDamage = calculateManualDamage();
+    const canWin = manualDamage >= currentTrialBoss.hp;
+    const hasShards = gameState.shards >= CONFIG.trialMode.costInShards;
+
+    document.getElementById('trial-boss-icon').textContent = currentTrialBoss.icon;
+    document.getElementById('trial-boss-name').textContent = currentTrialBoss.name;
+    document.getElementById('trial-boss-hp').textContent =
+        `HP: ${formatNumber(currentTrialBoss.hp)}`;
+
+    document.getElementById('trial-manual-damage').innerHTML =
+        `Tu daño manual: <strong>${formatNumber(manualDamage)}</strong>`;
+
+    const hintEl = document.getElementById('trial-result-hint');
+    if (canWin) {
+        hintEl.textContent = '✅ Puedes matarlo de un golpe';
+        hintEl.className = 'trial-hint can-win';
+    } else {
+        hintEl.textContent = `❌ Te falta ${formatNumber(currentTrialBoss.hp - manualDamage)} de daño`;
+        hintEl.className = 'trial-hint cant-win';
+    }
+
+    const enterBtn = document.getElementById('trial-enter-btn');
+    enterBtn.textContent = `⚔️ ENTRAR AL TRIAL (${CONFIG.trialMode.costInShards} Shards)`;
+    enterBtn.disabled = !hasShards;
+
+    document.getElementById('trial-modal').style.display = 'flex';
+    document.getElementById('modal-shards').textContent = formatNumber(gameState.shards);
+}
+
+function handleTrialAttempt() {
+    if (!currentTrialBoss) return;
+    if (gameState.shards < CONFIG.trialMode.costInShards) return;
+
+    // Gastar shards
+    gameState.shards -= CONFIG.trialMode.costInShards;
+
+    const manualDamage = calculateManualDamage();
+    const modalContent = document.querySelector('#trial-modal .modal-content');
+
+    if (manualDamage >= currentTrialBoss.hp) {
+        // ✅ VICTORIA
+        const reward = Math.floor(manualDamage * CONFIG.trialMode.essenceReward);
+        gameState.essence += reward;
+
+        modalContent.classList.add('trial-win-flash');
+        document.getElementById('trial-result-hint').textContent =
+            `🏆 ¡Victoria! +${formatNumber(reward)} Essence`;
+        document.getElementById('trial-result-hint').className = 'trial-hint can-win';
+
+        modalContent.addEventListener('animationend',
+            () => modalContent.classList.remove('trial-win-flash'), { once: true });
+    } else {
+        // ❌ DERROTA
+        modalContent.classList.add('trial-fail-flash');
+        document.getElementById('trial-result-hint').textContent =
+            `💀 Fallado — el boss tenía ${formatNumber(currentTrialBoss.hp - manualDamage)} HP de más`;
+        document.getElementById('trial-result-hint').className = 'trial-hint cant-win';
+
+        modalContent.addEventListener('animationend',
+            () => modalContent.classList.remove('trial-fail-flash'), { once: true });
+    }
+
+    // El boss cambia — el próximo trial será diferente
+    currentTrialBoss = null;
+
+    // Deshabilitar botón hasta cerrar y volver a abrir
+    document.getElementById('trial-enter-btn').disabled = true;
+
+    saveGame();
+    updateShardDisplay();
+}
+
+function updateShardDisplay() {
+    const shardEl = document.getElementById('shards');
+    if (shardEl) shardEl.textContent = formatNumber(gameState.shards);
+
+    const modalShardEl = document.getElementById('modal-shards');
+    if (modalShardEl) modalShardEl.textContent = formatNumber(gameState.shards);
+
+    // Activar/desactivar botón de trials según shards
+    if (elements.bossTrialsBtn) {
+        elements.bossTrialsBtn.disabled =
+            gameState.shards < CONFIG.trialMode.costInShards;
+    }
+}
+
 
 // 8. EVENTOS
 function setupListeners() {
@@ -352,6 +475,26 @@ function setupListeners() {
     elements.closeModalBtn.onclick = () => {
         elements.dpsModal.style.display = 'none';
     };
+
+    // Trials
+    if (elements.bossTrialsBtn) {
+        elements.bossTrialsBtn.onclick = openTrialModal;
+    }
+
+    document.getElementById('close-trial-modal-btn').onclick = () => {
+        document.getElementById('trial-modal').style.display = 'none';
+        currentTrialBoss = null;
+    };
+
+    document.getElementById('trial-enter-btn').onclick = handleTrialAttempt;
+
+    // Cerrar trial modal al click fuera
+    document.getElementById('trial-modal').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('trial-modal')) {
+            document.getElementById('trial-modal').style.display = 'none';
+            currentTrialBoss = null;
+        }
+    });
 }
 
 // 9. SAVE / LOAD
