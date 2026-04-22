@@ -22,6 +22,12 @@ const CONFIG = {
         { id: 3, name: "Rift Colossus", icon: "🌊", baseHP: 2000000, essenceReward: 6000 },
         { id: 4, name: "The Event Horizon", icon: "🌑", baseHP: 10000000, essenceReward: 35000, isFinal: true },
     ],
+    trialMode: {
+        costInShards: 100,
+        shardsPerBoss: [5, 12, 25, 60],
+        difficultyRange: [0.8, 1.5],
+        essenceReward: 50,
+    },
     scalingPerLoop: 2.2,
     growth: { upgrade: 1.38, dps: 1.30 },
     essenceRatio: 0.5
@@ -292,7 +298,7 @@ function gameLoop(currentTime) {
 
 // 8. EVENTOS
 function setupListeners() {
-    
+
     document.addEventListener('click', (e) => {
         if (e.target.classList.contains('buy-btn')) {
             handlePurchase(parseInt(e.target.dataset.id));
@@ -305,15 +311,15 @@ function setupListeners() {
         if (e.target === elements.dpsModal) {
             elements.dpsModal.style.display = 'none';
         }
-        
+
     });
 
-    
+
     document.querySelector('.boss-visual-wrapper').addEventListener('click', (e) => {
         const damage = calculateManualDamage();
         if (damage === 0) return;
 
-        
+
         if (!gameState.hintDismissed) {
             gameState.hintDismissed = true;
             document.getElementById('click-hint')?.classList.add('hidden');
