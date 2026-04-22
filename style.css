@@ -165,35 +165,42 @@ h1 {
     border: 1px solid #2a0020;
 }
 .boss-click-hint {
-   position: absolute;
+    position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%); /* Centrado absoluto sobre el boss */
-    
+    transform: translate(-50%, -50%);
     font-size: 0.8rem;
     font-weight: 900;
     letter-spacing: 3px;
     color: #fff;
-    background: rgba(0, 0, 0, 0.4); /* Fondo sutil para que sea legible sobre cualquier boss */
+    background: rgba(0, 0, 0, 0.4);
     padding: 4px 12px;
     border-radius: 4px;
     border: 1px solid var(--accent);
-    
     pointer-events: none;
     z-index: 5;
-    animation: hint-pulse 1.5s infinite ease-in-out;
     white-space: nowrap;
+
+    opacity: 1;
+    transition: opacity 0.4s ease;
+}
+
+.boss-click-hint.hidden {
+    opacity: 0;
+}
+
+.boss-click-hint:not(.hidden) {
+    animation: hint-pulse 1.5s infinite ease-in-out;
 }
 
 @keyframes hint-pulse {
-   0%, 100% { 
-        transform: translate(-50%, -50%) scale(1); 
+    0%, 100% {
+        transform: translate(-50%, -50%) scale(1);
         box-shadow: 0 0 5px var(--accent-glow);
     }
-    50% { 
-        transform: translate(-50%, -50%) scale(1.1); 
+    50% {
+        transform: translate(-50%, -50%) scale(1.08);
         box-shadow: 0 0 20px var(--accent-glow);
-        opacity: 1;
     }
 }
 

@@ -35,6 +35,7 @@ const gameState = {
     loopCount: 0,
     bossMaxHP: 100000,
     bossCurrentHP: 100000,
+    hintDismissed: false,
     upgradesOwned: Object.fromEntries(
         CONFIG.upgrades.map((u, i) => [u.id, i === 0 ? 1 : 0]) //
     ),
@@ -291,6 +292,7 @@ function gameLoop(currentTime) {
 
 // 8. EVENTOS
 function setupListeners() {
+    
     document.addEventListener('click', (e) => {
         if (e.target.classList.contains('buy-btn')) {
             handlePurchase(parseInt(e.target.dataset.id));
@@ -307,15 +309,15 @@ function setupListeners() {
     });
 
     
-    document.getElementById('boss-visual').addEventListener('click', (e) => {
+    document.querySelector('.boss-visual-wrapper').addEventListener('click', (e) => {
         const damage = calculateManualDamage();
         if (damage === 0) return;
 
-        const hint = document.getElementById('click-hint');
-        if (hint) {
-            if (gameState.damageDone > 50) {
-                hint.style.display = 'none';
-            }
+        
+        if (!gameState.hintDismissed) {
+            gameState.hintDismissed = true;
+            document.getElementById('click-hint')?.classList.add('hidden');
+            saveGame();
         }
 
         applyDamage(damage);
@@ -372,6 +374,11 @@ function loadGame() {
     spawnCurrentBoss();
     renderUpgrades();
     setupListeners();
+
+    if (gameState.hintDismissed) {
+        document.getElementById('click-hint')?.classList.add('hidden');
+    }
+
     requestAnimationFrame(gameLoop);
 
 })();
