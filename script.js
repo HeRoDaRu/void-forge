@@ -5,32 +5,32 @@
 // 1. CONFIGURACIÓN
 const CONFIG = {
     upgrades: [
-        { id: 1, name: "Void Spark", icon: "✨", baseCost: 15, manualDamage: 12 },
-        { id: 2, name: "Echo Fragment", icon: "🔊", baseCost: 2000, manualDamage: 45 },
-        { id: 3, name: "Nebula Weaver", icon: "🌌", baseCost: 85000, manualDamage: 160 },
-        { id: 4, name: "Rift Anchor", icon: "🌊", baseCost: 3500000, manualDamage: 520 },
+        { id: 1, name: "Void Spark",    icon: "✨", baseCost: 150,      manualDamage: 12  },
+        { id: 2, name: "Echo Fragment", icon: "🔊", baseCost: 8000,     manualDamage: 45  },
+        { id: 3, name: "Nebula Weaver", icon: "🌌", baseCost: 250000,   manualDamage: 160 },
+        { id: 4, name: "Rift Anchor",   icon: "🌊", baseCost: 8000000,  manualDamage: 520 },
     ],
     dpsImprovements: [
-        { id: 101, upgradeId: 1, name: "Void Spark DPS", maxLevel: 5, baseCost: 8000, multiplier: 0.25 },
-        { id: 201, upgradeId: 2, name: "Echo Fragment DPS", maxLevel: 5, baseCost: 120000, multiplier: 0.35 },
-        { id: 301, upgradeId: 3, name: "Nebula Weaver DPS", maxLevel: 5, baseCost: 2000000, multiplier: 0.75 },
-        { id: 401, upgradeId: 4, name: "Rift Anchor DPS", maxLevel: 5, baseCost: 8000000, multiplier: 1.15 },
+        { id: 101, upgradeId: 1, name: "Void Spark DPS",     maxLevel: 5, baseCost: 40000,    multiplier: 0.20 },
+        { id: 201, upgradeId: 2, name: "Echo Fragment DPS",  maxLevel: 5, baseCost: 500000,   multiplier: 0.28 },
+        { id: 301, upgradeId: 3, name: "Nebula Weaver DPS",  maxLevel: 5, baseCost: 8000000,  multiplier: 0.60 },
+        { id: 401, upgradeId: 4, name: "Rift Anchor DPS",    maxLevel: 5, baseCost: 30000000, multiplier: 0.90 },
     ],
     bosses: [
-        { id: 1, name: "The Void Wraith", icon: "👻", baseHP: 100000, essenceReward: 300 },
-        { id: 2, name: "Nebula Devourer", icon: "🌌", baseHP: 500000, essenceReward: 1200 },
-        { id: 3, name: "Rift Colossus", icon: "🌊", baseHP: 2000000, essenceReward: 6000 },
-        { id: 4, name: "The Event Horizon", icon: "🌑", baseHP: 10000000, essenceReward: 35000, isFinal: true },
+        { id: 1, name: "The Void Wraith",   icon: "👻", baseHP: 50000,    essenceReward: 150   },
+        { id: 2, name: "Nebula Devourer",   icon: "🌌", baseHP: 300000,   essenceReward: 600   },
+        { id: 3, name: "Rift Colossus",     icon: "🌊", baseHP: 1500000,  essenceReward: 3000  },
+        { id: 4, name: "The Event Horizon", icon: "🌑", baseHP: 8000000,  essenceReward: 18000, isFinal: true },
     ],
     trialMode: {
-        costInShards: 100,
-        shardsPerBoss: [5, 12, 25, 60],
+        costInShards: 50,
+        shardsPerBoss: [8, 18, 35, 80],
         difficultyRange: [0.8, 1.5],
-        essenceReward: 50,
+        essenceReward: 80,
     },
-    scalingPerLoop: 2.2,
+    scalingPerLoop: 1.45,
     growth: { upgrade: 1.38, dps: 1.30 },
-    essenceRatio: 0.5
+    essenceRatio: 0.25,
 };
 
 // 2. ESTADO
@@ -88,13 +88,22 @@ const getCost = (base, growth, level) => Math.floor(base * Math.pow(growth, leve
 
 let cachedDPS = 0;
 function updateCachedDPS() {
-    cachedDPS = CONFIG.dpsImprovements.reduce((total, conf) => {
+    const rawDPS = CONFIG.dpsImprovements.reduce((total, conf) => {
         const level = gameState.dpsLevels[conf.id] || 0;
         const owned = gameState.upgradesOwned[conf.upgradeId] || 0;
         if (level === 0 || owned === 0) return total;
         const baseUpg = CONFIG.upgrades.find(u => u.id === conf.upgradeId);
         return total + (baseUpg.manualDamage * conf.multiplier * level * owned);
     }, 0);
+
+    const manualDamage = calculateManualDamage();
+    const hardCap = manualDamage * 0.85;
+
+    if (rawDPS > hardCap) {
+        console.warn(`DPS cap triggered: raw=${rawDPS.toFixed(0)} capped=${hardCap.toFixed(0)}`);
+    }
+
+    cachedDPS = Math.min(rawDPS, hardCap);
 }
 
 function getBossHP(bossConfig) {
