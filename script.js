@@ -231,7 +231,8 @@ function updateDPSCards() {
         const card = document.getElementById(`dps-card-${conf.id}`);
         if (!card) return;
 
-        const lvl = gameState.dpsLevels[conf.id] || 0;
+        // const lvl = gameState.dpsLevels[conf.id] || 0;
+        const lvl = gameState.dpsLevels[conf.id];
         const cost = getCost(conf.baseCost, CONFIG.growth.dps, lvl);
         const isMax = lvl >= conf.maxLevel;
 
@@ -263,9 +264,21 @@ function spawnDamageNumber(damage, event) {
 // 7. GAME LOOP
 let lastTime = performance.now();
 let lastEssenceInt = -1;
+let lastDPSAnimTime = 0;
+const DPS_ANIM_INTERVAL = 1.0
 
 function tick(delta) {
-    if (cachedDPS > 0) applyDamage(cachedDPS * delta);
+    if (cachedDPS <= 0) return;
+
+
+    applyDamage(cachedDPS * delta);
+    
+    lastDPSAnimTime += delta;
+    if (lastDPSAnimTime >= DPS_ANIM_INTERVAL) {
+        lastDPSAnimTime = 0;
+        spawnDamageNumber(cachedDPS);
+        triggerBossHitAnimation();
+    }
 }
 
 function render() {
@@ -412,12 +425,19 @@ function updateShardDisplay() {
     if (modalShardEl) modalShardEl.textContent = formatNumber(gameState.shards);
 
     // Activar/desactivar botón de trials según shards
-    if (elements.bossTrialsBtn) {
-        elements.bossTrialsBtn.disabled =
-            gameState.shards < CONFIG.trialMode.costInShards;
-    }
+    // if (elements.bossTrialsBtn) {
+    //     elements.bossTrialsBtn.disabled =
+    //         gameState.shards < CONFIG.trialMode.costInShards;
+    // }
 }
 
+function triggerBossHitAnimation() {
+    const bossEl = document.getElementById('boss-visual');
+    bossEl.classList.remove('hit');
+    void bossEl.offsetWidth;
+    bossEl.classList.add('hit');
+    bossEl.addEventListener('animationend', () => bossEl.classList.remove('hit'), { once: true });
+}
 
 // 8. EVENTOS
 function setupListeners() {
@@ -453,11 +473,7 @@ function setupListeners() {
         updateUpgradeCards();
         saveGame();
 
-        const bossEl = document.getElementById('boss-visual');
-        bossEl.classList.remove('hit');
-        void bossEl.offsetWidth;
-        bossEl.classList.add('hit');
-        bossEl.addEventListener('animationend', () => bossEl.classList.remove('hit'), { once: true });
+        triggerBossHitAnimation()
 
         spawnDamageNumber(damage, e);
     });
