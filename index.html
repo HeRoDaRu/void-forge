@@ -17,6 +17,7 @@
                 <div class="stat-item"><span class="label">Total Damage</span><strong id="damage-done">0</strong></div>
                 <div class="stat-item"><span class="label">DPS</span><strong id="dps">0.0</strong></div>
                 <div class="stat-item"><span class="label">Loop</span><strong id="loop-count">0</strong></div>
+                <div class="stat-item"><span class="label">Shards</span><strong id="shards">0</strong></div>
             </div>
         </header>
 
@@ -37,6 +38,7 @@
 
             <div class="actions-panel">
                 <button id="dps-improves-btn" class="action-btn-primary">⚡ MEJORAR DPS</button>
+                <button id="boss-trials-btn" class="boss-trials-btn-primary">⚔️ TRIALES</button>
             </div>
 
             <div class="upgrades-scroll">
@@ -56,6 +58,33 @@
                 <button id="close-modal-btn" class="close-btn">✕</button>
             </div>
             <div id="dps-improves-list" class="dps-list"></div>
+        </div>
+    </div>
+
+    <div id="trial-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>⚔️ Void Trial</h2>
+                <div class="modal-essence">
+                    <span class="label">Shards</span>
+                    <strong id="modal-shards">0</strong>
+                </div>
+                <button id="close-trial-modal-btn" class="close-btn">✕</button>
+            </div>
+            <div class="trial-content">
+                <div class="trial-boss-preview">
+                    <div id="trial-boss-icon" class="trial-boss-icon">💀</div>
+                    <div id="trial-boss-name" class="trial-boss-name">???</div>
+                    <div id="trial-boss-hp" class="trial-boss-hp">HP: ???</div>
+                </div>
+                <div class="trial-info">
+                    <p id="trial-manual-damage" class="trial-stat">Tu daño manual: <strong>0</strong></p>
+                    <p id="trial-result-hint" class="trial-hint"></p>
+                </div>
+                <button id="trial-enter-btn" class="trial-enter-btn">
+                    ⚔️ ENTRAR AL TRIAL (100 Shards)
+                </button>
+            </div>
         </div>
     </div>
 

@@ -618,3 +618,146 @@ h1 {
     z-index: 10;
     font-family: monospace;
 }
+
+/* ==================== TRIALS ==================== */
+.actions-panel {
+    flex-direction: row;
+    justify-content: center;
+    gap: 10px;
+}
+
+.boss-trials-btn-primary {
+    padding: 12px 24px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    border-radius: 8px;
+    text-transform: uppercase;
+    background: rgba(255, 100, 50, 0.2);
+    color: var(--orange);
+    border: 1px solid rgba(255, 120, 50, 0.4);
+    transition: all 0.2s ease;
+    min-width: 140px;
+}
+
+.boss-trials-btn-primary:hover {
+    background: rgba(255, 120, 50, 0.3);
+    border-color: var(--orange);
+    box-shadow: 0 0 16px rgba(255, 100, 50, 0.2);
+    transform: translateY(-1px);
+}
+
+.boss-trials-btn-primary:disabled {
+    background: transparent;
+    color: #2a2a44;
+    border-color: #151525;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.trial-content {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.trial-boss-preview {
+    text-align: center;
+    padding: 20px;
+    background: #0a0a16;
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+}
+
+.trial-boss-icon {
+    font-size: 5rem;
+    margin-bottom: 8px;
+    filter: drop-shadow(0 0 20px rgba(255, 100, 50, 0.5));
+    animation: void-pulse 4s infinite ease-in-out;
+}
+
+.trial-boss-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 6px;
+}
+
+.trial-boss-hp {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    font-family: monospace;
+}
+
+.trial-info {
+    background: #0a0a16;
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 14px 16px;
+}
+
+.trial-stat {
+    margin: 4px 0;
+    font-size: 0.88rem;
+    color: var(--text-dim);
+}
+
+.trial-stat strong {
+    color: var(--text);
+}
+
+.trial-hint {
+    margin: 10px 0 0;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+.trial-hint.can-win  { color: var(--green); }
+.trial-hint.cant-win { color: var(--red);   }
+
+.trial-enter-btn {
+    width: 100%;
+    padding: 14px;
+    background: rgba(255, 100, 50, 0.2);
+    color: var(--orange);
+    border: 1px solid rgba(255, 120, 50, 0.4);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: all 0.2s ease;
+}
+
+.trial-enter-btn:not(:disabled):hover {
+    background: rgba(255, 120, 50, 0.3);
+    border-color: var(--orange);
+    box-shadow: 0 0 20px rgba(255, 100, 50, 0.2);
+}
+
+.trial-enter-btn:disabled {
+    background: transparent;
+    color: #2a2a44;
+    border-color: #151525;
+    cursor: not-allowed;
+}
+
+/* Resultado del trial */
+@keyframes trial-win {
+    0%   { box-shadow: 0 0 0 rgba(0, 255, 136, 0); }
+    50%  { box-shadow: 0 0 40px rgba(0, 255, 136, 0.4); }
+    100% { box-shadow: 0 0 0 rgba(0, 255, 136, 0); }
+}
+
+@keyframes trial-fail {
+    0%   { box-shadow: 0 0 0 rgba(255, 45, 85, 0); }
+    50%  { box-shadow: 0 0 40px rgba(255, 45, 85, 0.4); }
+    100% { box-shadow: 0 0 0 rgba(255, 45, 85, 0); }
+}
+
+.trial-win-flash  { animation: trial-win  0.6s ease; }
+.trial-fail-flash { animation: trial-fail 0.6s ease; }
