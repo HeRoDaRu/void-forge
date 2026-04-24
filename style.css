@@ -768,3 +768,108 @@ h1 {
     font-size: 0.75rem;
     color: var(--accent);
 }
+
+.prestige-btn-primary {
+    padding: 12px 24px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    border-radius: 8px;
+    text-transform: uppercase;
+    background: rgba(255, 200, 50, 0.2);
+    color: var(--gold);
+    border: 1px solid rgba(255, 220, 100, 0.4);
+    transition: all 0.2s ease;
+    min-width: 140px;
+}
+
+.prestige-btn-primary:hover {
+    background: rgba(255, 220, 100, 0.3);
+    border-color: var(--gold);
+    box-shadow: 0 0 16px rgba(255, 200, 50, 0.2);
+    transform: translateY(-1px);
+}
+
+.prestige-btn-primary:disabled {
+    background: transparent;
+    color: #2a2a44;
+    border-color: #151525;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ==================== PRESTIGE ==================== */
+.prestige-list {
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.prestige-node {
+    background: #0a0a16;
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    transition: border-color 0.25s;
+}
+
+.prestige-node.unlocked {
+    border-color: rgba(255, 200, 50, 0.4);
+    background: rgba(255, 200, 50, 0.04);
+}
+
+.prestige-node.tier-locked {
+    opacity: 0.35;
+    filter: grayscale(0.8);
+}
+
+.prestige-node h3 {
+    margin: 0 0 4px 0;
+    font-size: 1rem;
+    color: var(--gold);
+}
+
+.prestige-node p {
+    margin: 0 0 10px;
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    line-height: 1.5;
+}
+
+.prestige-buy-btn {
+    width: 100%;
+    padding: 11px;
+    background: rgba(255, 200, 50, 0.12);
+    color: var(--gold);
+    border: 1px solid rgba(255, 200, 50, 0.25);
+    border-radius: 7px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    transition: all 0.18s ease;
+}
+
+.prestige-buy-btn:not(:disabled):hover {
+    background: rgba(255, 200, 50, 0.22);
+    border-color: var(--gold);
+    box-shadow: 0 0 14px rgba(255, 200, 50, 0.15);
+}
+
+.prestige-buy-btn:disabled {
+    background: transparent;
+    color: #2a2a44;
+    border-color: #151525;
+    cursor: not-allowed;
+}
+
+.prestige-buy-btn.clicked {
+    animation: btn-bounce 0.22s ease, btn-flash-prestige 0.3s ease;
+}
+
+@keyframes btn-flash-prestige {
+    0%   { background: rgba(255, 200, 50, 0.12); border-color: rgba(255, 200, 50, 0.25); }
+    40%  { background: rgba(255, 200, 50, 0.45); border-color: var(--gold); box-shadow: 0 0 20px rgba(255, 200, 50, 0.35); }
+    100% { background: rgba(255, 200, 50, 0.12); border-color: rgba(255, 200, 50, 0.25); }
+}
