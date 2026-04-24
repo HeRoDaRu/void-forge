@@ -36,7 +36,7 @@ Progreso estimado del proyecto: `[====------] 40%`
 
 ## 🟡 Fase 3: Progresión Profunda (En curso)
 > **Objetivo:** Retener al jugador con metas a largo plazo.
-- [ ] **Sistema de Prestige:** Reiniciar el universo a cambio de multiplicadores permanentes.
+- [X] **Sistema de Prestige:** Reiniciar el universo a cambio de multiplicadores permanentes.
 - [ ] **Logros (Achievements):** Sistema de medallas por daño total, loops completados o trials ganados.
 - [ ] **Offline Progress:** Cálculo de daño y esencia acumulada al cerrar el juego.
 - [ ] **Escalado de contenido:** Ampliar hasta 8-10 upgrades con curva balanceada.
@@ -51,6 +51,7 @@ Progreso estimado del proyecto: `[====------] 40%`
 - [ ] **Data Management:** Botón para exportar/importar partidas (JSON).
 - [ ] **Modo Hardcore:** Variante con mayor dificultad y recompensas exclusivas.
 - [ ] **Audio:** Efectos de sonido y música ambiente opcionales.
+- [x] **Testeos Internos:** Posibilidad de verificar que todo funciona sin tener que testearlo directamente en el juego
 
 ---
 
