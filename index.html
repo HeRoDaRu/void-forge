@@ -39,6 +39,7 @@
             <div class="actions-panel">
                 <button id="dps-improves-btn" class="action-btn-primary">⚡ MEJORAR DPS</button>
                 <button id="boss-trials-btn" class="boss-trials-btn-primary">⚔️ TRIALES</button>
+                <button id="prestige-btn" class="prestige-btn-primary">⚡ PRESTIGIO</button>
             </div>
 
             <div class="upgrades-scroll">
@@ -88,9 +89,24 @@
         </div>
     </div>
 
+    <div id="prestige-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>⚡ Prestigio</h2>
+                <div class="modal-essence">
+                    <span class="label">Shards</span>
+                    <strong id="prestige-modal-shards">0</strong>
+                </div>
+                <button id="close-prestige-modal-btn" class="close-btn">✕</button>
+            </div>
+            <div id="prestige-nodes-list" class="prestige-list"></div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 <footer>
     <p class="footer-text">Desarrollado por hectorrf16. ¡Gracias por jugar!</p>
 </footer>
+
 </html>

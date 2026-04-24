@@ -5,23 +5,47 @@
 // 1. CONFIGURACIÓN
 const CONFIG = {
     upgrades: [
-        { id: 1, name: "Void Spark",    icon: "✨", baseCost: 150,      manualDamage: 12  },
-        { id: 2, name: "Echo Fragment", icon: "🔊", baseCost: 8000,     manualDamage: 45  },
-        { id: 3, name: "Nebula Weaver", icon: "🌌", baseCost: 250000,   manualDamage: 160 },
-        { id: 4, name: "Rift Anchor",   icon: "🌊", baseCost: 8000000,  manualDamage: 520 },
+        { id: 1, name: "Void Spark", icon: "✨", baseCost: 150, manualDamage: 12 },
+        { id: 2, name: "Echo Fragment", icon: "🔊", baseCost: 8000, manualDamage: 45 },
+        { id: 3, name: "Nebula Weaver", icon: "🌌", baseCost: 250000, manualDamage: 160 },
+        { id: 4, name: "Rift Anchor", icon: "🌊", baseCost: 8000000, manualDamage: 520 },
     ],
     dpsImprovements: [
-        { id: 101, upgradeId: 1, name: "Void Spark DPS",     maxLevel: 5, baseCost: 40000,    multiplier: 0.20 },
-        { id: 201, upgradeId: 2, name: "Echo Fragment DPS",  maxLevel: 5, baseCost: 500000,   multiplier: 0.28 },
-        { id: 301, upgradeId: 3, name: "Nebula Weaver DPS",  maxLevel: 5, baseCost: 8000000,  multiplier: 0.60 },
-        { id: 401, upgradeId: 4, name: "Rift Anchor DPS",    maxLevel: 5, baseCost: 30000000, multiplier: 0.90 },
+        { id: 101, upgradeId: 1, name: "Void Spark DPS", maxLevel: 5, baseCost: 40000, multiplier: 0.20 },
+        { id: 201, upgradeId: 2, name: "Echo Fragment DPS", maxLevel: 5, baseCost: 500000, multiplier: 0.28 },
+        { id: 301, upgradeId: 3, name: "Nebula Weaver DPS", maxLevel: 5, baseCost: 8000000, multiplier: 0.60 },
+        { id: 401, upgradeId: 4, name: "Rift Anchor DPS", maxLevel: 5, baseCost: 30000000, multiplier: 0.90 },
     ],
     bosses: [
-        { id: 1, name: "The Void Wraith",   icon: "👻", baseHP: 50000,    essenceReward: 150   },
-        { id: 2, name: "Nebula Devourer",   icon: "🌌", baseHP: 300000,   essenceReward: 600   },
-        { id: 3, name: "Rift Colossus",     icon: "🌊", baseHP: 1500000,  essenceReward: 3000  },
-        { id: 4, name: "The Event Horizon", icon: "🌑", baseHP: 8000000,  essenceReward: 18000, isFinal: true },
+        { id: 1, name: "The Void Wraith", icon: "👻", baseHP: 50000, essenceReward: 150 },
+        { id: 2, name: "Nebula Devourer", icon: "🌌", baseHP: 300000, essenceReward: 600 },
+        { id: 3, name: "Rift Colossus", icon: "🌊", baseHP: 1500000, essenceReward: 3000 },
+        { id: 4, name: "The Event Horizon", icon: "🌑", baseHP: 8000000, essenceReward: 18000, isFinal: true },
     ],
+   prestigeNodes: [
+    // TIER 1 — disponible desde prestige 1, costes bajos
+    { id: 101, prestigeId: 1, cost: 200, name: "Essence Surge",   icon: "⚡", description: "Aumenta la esencia ganada en un 10%.", essenceRatio: 0.10 },
+    { id: 102, prestigeId: 1, cost: 200, name: "Shard Mastery",   icon: "💎", description: "Reduce el coste de los Boss Trials en un 5%.", costInShards: 0.05 },
+    { id: 103, prestigeId: 1, cost: 250, name: "Eternal Growth",  icon: "🌱", description: "Reduce el crecimiento de costes de upgrades en un 2%.", baseCost: 1.02 },
+    { id: 104, prestigeId: 1, cost: 250, name: "Loop Resilience", icon: "🛡️", description: "Reduce el HP de bosses por loop en un 5%.", scalingPerLoop: 0.95 },
+
+    // TIER 2 — disponible desde prestige 3, costes medios
+    { id: 201, prestigeId: 2, cost: 600, name: "Manual Mastery",      icon: "👊", description: "Aumenta el daño manual en un 15%.", manualDamage: 0.15 },
+    { id: 202, prestigeId: 2, cost: 600, name: "DPS Synergy",         icon: "🤝", description: "Aumenta el multiplicador de DPS en un 10%.", multiplier: 0.10 },
+    { id: 203, prestigeId: 2, cost: 600, name: "Essence Efficiency",  icon: "♻️", description: "Reduce el coste de mejoras DPS en un 10%.", baseCost: 0.90 },
+    { id: 204, prestigeId: 2, cost: 800, name: "Shard Hoarder",       icon: "🧤", description: "Aumenta shards ganados en Trials en un 10%.", shardsPerBoss: 0.10 },
+
+    // TIER 3 — disponible desde prestige 15, costes altos
+    { id: 301, prestigeId: 3, cost: 2500, name: "Loop Mastery",      icon: "🔁", description: "Cada loop aumenta la esencia ganada en un 20%.", essencePerLoop: 0.20 },
+    { id: 302, prestigeId: 3, cost: 2500, name: "Trial Veteran",     icon: "🏅", description: "Trials otorgan un 15% más de esencia y shards.", essenceReward: 0.15 },
+    { id: 303, prestigeId: 3, cost: 2500, name: "DPS Overdrive",     icon: "🚀", description: "Aumenta tu DPS total en un 25%.", dpsMultiplier: 0.25 },
+    { id: 304, prestigeId: 3, cost: 3500, name: "Upgrade Overhaul",  icon: "⚙️", description: "Reduce el coste de upgrades en un 15%.", baseCost: 0.85 },
+],
+    prestigeCost: {
+        tier1: { id: 1, shardCost: 800, essenceCost: 5000 },
+        tier2: { id: 2, shardCost: 2500, essenceCost: 50000 },
+        tier3: { id: 3, shardCost: 8000, essenceCost: 500000 },
+    },
     trialMode: {
         costInShards: 50,
         shardsPerBoss: [8, 18, 35, 80],
@@ -34,6 +58,9 @@ const CONFIG = {
 };
 
 // 2. ESTADO
+let lastClickTime = 0;
+const CLICK_THROTTLE_MS = 50;
+
 const gameState = {
     essence: 0,
     shards: 0,
@@ -52,6 +79,13 @@ const gameState = {
     ),
 };
 
+const prestigeState = {
+    prestigeCount: 1,
+    unlockedNodes: Object.fromEntries(
+        CONFIG.prestigeNodes.map(n => [n.id, 0])
+    )
+}
+
 // 3. DOM
 const elements = {
     essence: document.getElementById('essence'),
@@ -64,10 +98,15 @@ const elements = {
     bossTrialsBtn: document.getElementById('boss-trials-btn'),
     dpsModal: document.getElementById('dps-modal'),
     closeModalBtn: document.getElementById('close-modal-btn'),
-    dpsList: document.getElementById('dps-improves-list')
+    dpsList: document.getElementById('dps-improves-list'),
+    prestigeNodes: document.getElementById('prestige-nodes-list'),
 };
 
 // 4. UTILIDADES
+const formatNumber = (num) => Math.floor(num).toLocaleString('es-ES');
+const getCost = (base, growth, level) => Math.floor(base * Math.pow(growth, level));
+
+let cachedDPS = 0;
 function getConfigHash() {
     const str = JSON.stringify({
         upgrades: CONFIG.upgrades.map(u => ({ id: u.id, baseCost: u.baseCost })),
@@ -83,10 +122,6 @@ function getConfigHash() {
     return Math.abs(hash).toString(36); // ej: "1k4zx9"
 }
 
-const formatNumber = (num) => Math.floor(num).toLocaleString('es-ES');
-const getCost = (base, growth, level) => Math.floor(base * Math.pow(growth, level));
-
-let cachedDPS = 0;
 function updateCachedDPS() {
     const rawDPS = CONFIG.dpsImprovements.reduce((total, conf) => {
         const level = gameState.dpsLevels[conf.id] || 0;
@@ -115,6 +150,19 @@ function triggerButtonFeedback(btn) {
     void btn.offsetWidth;
     btn.classList.add('clicked');
     btn.addEventListener('animationend', () => btn.classList.remove('clicked'), { once: true });
+}
+
+function getPrestigeCost() {
+    const count = prestigeState.prestigeCount;
+
+    if (count < 1) return [CONFIG.prestigeCost.tier1.shardCost, CONFIG.prestigeCost.tier1.essenceCost];
+    if (count < 3) return [CONFIG.prestigeCost.tier2.shardCost, CONFIG.prestigeCost.tier2.essenceCost];
+    return [CONFIG.prestigeCost.tier3.shardCost, CONFIG.prestigeCost.tier3.essenceCost];
+}
+
+function canPrestige() {
+    const [shardCost, essenceCost] = getPrestigeCost();
+    return gameState.essence >= essenceCost && gameState.shards >= shardCost;
 }
 
 // 5. ACCIONES
@@ -152,6 +200,26 @@ function handlePurchase(id, isDPS = false) {
     saveGame();
 }
 
+function handlePrestigeNodePurchase(nodeId) {
+    const node = CONFIG.prestigeNodes.find(n => n.id === nodeId);
+    if (!node) return;
+
+    // El tier disponible se saca del prestigeId del nodo
+    const tierUnlocked = prestigeState.prestigeCount >= node.prestigeId;
+
+    if (prestigeState.unlockedNodes[nodeId] === 1) return;
+    if (!tierUnlocked) return;                            
+    if (gameState.shards < node.cost) return;             
+
+    gameState.shards -= node.cost;
+    prestigeState.unlockedNodes[nodeId] = 1;
+
+    updateShardDisplay();
+    updatePrestigeNodes();
+    savePrestige();
+    saveGame();
+}
+
 function spawnCurrentBoss() {
     const bossConfig = CONFIG.bosses[gameState.bossIndex];
     gameState.bossMaxHP = getBossHP(bossConfig);
@@ -184,6 +252,31 @@ function calculateManualDamage() {
         const owned = gameState.upgradesOwned[conf.id] || 0;
         return total + (conf.manualDamage * owned);
     }, 0);
+}
+
+function prestigeReset() {
+    if (!canPrestige()) return;
+
+    prestigeState.prestigeCount++;
+
+    gameState.essence = 0;
+    gameState.damageDone = 0;
+    gameState.bossIndex = 0;
+    gameState.loopCount = 0;
+    gameState.hintDismissed = true;
+    // gameState.bossMaxHP = CONFIG.bosses[0].baseHP;
+    // gameState.bossCurrentHP = CONFIG.bosses[0].baseHP;
+    gameState.upgradesOwned = Object.fromEntries(
+        CONFIG.upgrades.map(u => [u.id, u.id === 1 ? 1 : 0])
+    );
+    gameState.dpsLevels = Object.fromEntries(
+        CONFIG.dpsImprovements.map(d => [d.id, 0])
+    );
+
+    spawnCurrentBoss();
+    updateCachedDPS();
+    savePrestige();
+    saveGame();
 }
 
 // 6. RENDER
@@ -254,6 +347,44 @@ function updateDPSCards() {
     });
 }
 
+function renderPrestigeNodes() {
+    elements.prestigeNodes.innerHTML = CONFIG.prestigeNodes.map(conf => `
+        <div class="prestige-node" id="prestige-node-${conf.id}">
+            <h3>${conf.icon} ${conf.name}</h3>
+            <p>${conf.description}</p>
+            <button class="prestige-buy-btn" data-prestige-id="${conf.id}"></button>
+        </div>
+    `).join('');
+    updatePrestigeNodes();
+}
+
+function updatePrestigeNodes() {
+    CONFIG.prestigeNodes.forEach(conf => {
+        const node = document.getElementById(`prestige-node-${conf.id}`);
+        if (!node) return;
+
+        const isUnlocked = prestigeState.unlockedNodes[conf.id] === 1;
+        const tierAvailable = prestigeState.prestigeCount >= conf.prestigeId;
+        const canAfford = gameState.shards >= conf.cost;
+
+        const btn = node.querySelector('.prestige-buy-btn');
+
+        if (isUnlocked) {
+            btn.textContent = '✅ DESBLOQUEADO';
+            btn.disabled = true;
+        } else if (!tierAvailable) {
+            btn.textContent = `🔒 Requiere prestigio ${conf.prestigeId}`;
+            btn.disabled = true;
+        } else {
+            btn.textContent = `DESBLOQUEAR: ${formatNumber(conf.cost)} Shards`;
+            btn.disabled = !canAfford;
+        }
+
+        node.classList.toggle('unlocked', isUnlocked);
+        node.classList.toggle('tier-locked', !tierAvailable);
+    });
+}
+
 function spawnDamageNumber(damage, event) {
     const wrapper = document.querySelector('.boss-visual-wrapper');
     const rect = wrapper.getBoundingClientRect();
@@ -281,7 +412,7 @@ function tick(delta) {
 
 
     applyDamage(cachedDPS * delta);
-    
+
     lastDPSAnimTime += delta;
     if (lastDPSAnimTime >= DPS_ANIM_INTERVAL) {
         lastDPSAnimTime = 0;
@@ -433,6 +564,12 @@ function updateShardDisplay() {
     const modalShardEl = document.getElementById('modal-shards');
     if (modalShardEl) modalShardEl.textContent = formatNumber(gameState.shards);
 
+    const prestigeShardEl = document.getElementById('prestige-modal-shards');
+    if (prestigeShardEl) prestigeShardEl.textContent = formatNumber(gameState.shards);
+
+    const prestigeEssenceEl = document.getElementById('prestige-modal-essence');
+    if (prestigeEssenceEl) prestigeEssenceEl.textContent = formatNumber(gameState.essence);
+
     // Activar/desactivar botón de trials según shards
     // if (elements.bossTrialsBtn) {
     //     elements.bossTrialsBtn.disabled =
@@ -448,9 +585,18 @@ function triggerBossHitAnimation() {
     bossEl.addEventListener('animationend', () => bossEl.classList.remove('hit'), { once: true });
 }
 
+function openModal(modalId) {
+    document.getElementById(modalId).style.display = 'flex';
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+}
+
 // 8. EVENTOS
 function setupListeners() {
 
+    // ── Compras por delegación ──────────────────────────────
     document.addEventListener('click', (e) => {
         if (e.target.classList.contains('buy-btn')) {
             handlePurchase(parseInt(e.target.dataset.id));
@@ -460,17 +606,20 @@ function setupListeners() {
             handlePurchase(parseInt(e.target.dataset.dpsId), true);
             triggerButtonFeedback(e.target);
         }
-        if (e.target === elements.dpsModal) {
-            elements.dpsModal.style.display = 'none';
+        if (e.target.classList.contains('prestige-buy-btn')) {
+            handlePrestigeNodePurchase(parseInt(e.target.dataset.prestigeId));
+            triggerButtonFeedback(e.target);
         }
-
     });
 
-
+    // ── Click en el boss ────────────────────────────────────
     document.querySelector('.boss-visual-wrapper').addEventListener('click', (e) => {
+        const now = performance.now();
+        if (now - lastClickTime < CLICK_THROTTLE_MS) return;
+        lastClickTime = now;
+
         const damage = calculateManualDamage();
         if (damage === 0) return;
-
 
         if (!gameState.hintDismissed) {
             gameState.hintDismissed = true;
@@ -481,53 +630,66 @@ function setupListeners() {
         applyDamage(damage);
         updateUpgradeCards();
         saveGame();
-
-        triggerBossHitAnimation()
-
+        triggerBossHitAnimation();
         spawnDamageNumber(damage, e);
     });
 
+    // ── Abrir modals ────────────────────────────────────────
     elements.dpsMainBtn.onclick = () => {
-        elements.dpsModal.style.display = 'flex';
+        openModal('dps-modal');
         const alreadyRendered = document.getElementById(`dps-card-${CONFIG.dpsImprovements[0].id}`);
-        if (alreadyRendered) {
-            updateDPSCards();
-        } else {
-            renderDPSImprovements();
-        }
+        alreadyRendered ? updateDPSCards() : renderDPSImprovements();
     };
 
-    elements.closeModalBtn.onclick = () => {
-        elements.dpsModal.style.display = 'none';
+    elements.bossTrialsBtn.onclick = () => {
+        openModal('trial-modal');
+        openTrialModal();
     };
 
-    // Trials
-    if (elements.bossTrialsBtn) {
-        elements.bossTrialsBtn.onclick = openTrialModal;
-    }
+    document.getElementById('prestige-btn').onclick = () => {
+        openModal('prestige-modal');
+        renderPrestigeNodes();
+    };
 
+    // ── Cerrar modals con X ─────────────────────────────────
+    elements.closeModalBtn.onclick = () => closeModal('dps-modal');
     document.getElementById('close-trial-modal-btn').onclick = () => {
-        document.getElementById('trial-modal').style.display = 'none';
+        closeModal('trial-modal');
         currentTrialBoss = null;
     };
+    document.getElementById('close-prestige-modal-btn').onclick = () => closeModal('prestige-modal');
 
-    document.getElementById('trial-enter-btn').onclick = handleTrialAttempt;
-
-    // Cerrar trial modal al click fuera
-    document.getElementById('trial-modal').addEventListener('click', (e) => {
-        if (e.target === document.getElementById('trial-modal')) {
-            document.getElementById('trial-modal').style.display = 'none';
-            currentTrialBoss = null;
-        }
+    // ── Cerrar modals al click fuera ────────────────────────
+    ['dps-modal', 'trial-modal', 'prestige-modal'].forEach(id => {
+        document.getElementById(id).addEventListener('click', (e) => {
+            if (e.target === document.getElementById(id)) {
+                if (id === 'trial-modal') currentTrialBoss = null;
+                closeModal(id);
+            }
+        });
     });
+
+    // ── Trial ───────────────────────────────────────────────
+    document.getElementById('trial-enter-btn').onclick = handleTrialAttempt;
 }
 
 // 9. SAVE / LOAD
 const SAVE_KEY = `eternalVoidSave_${getConfigHash()}`;
+let saveTimeout = null;
 const saveGame = () => {
-    const { bossMaxHP, bossCurrentHP, ...toSave } = gameState
-    localStorage.setItem(SAVE_KEY, JSON.stringify(toSave));
+    if (saveTimeout) return;
+    saveTimeout = setTimeout(() => {
+        const { bossMaxHP, bossCurrentHP, ...toSave } = gameState
+        localStorage.setItem(SAVE_KEY, JSON.stringify(toSave));
+        saveTimeout = null;
+    }, 2000)
 };
+
+const SAVE_KEY_PRESTIGE = `eternalVoidPrestige`;
+const savePrestige = () => {
+    localStorage.setItem(SAVE_KEY_PRESTIGE, JSON.stringify(prestigeState));
+}
+
 function loadGame() {
     try {
         const saved = localStorage.getItem(SAVE_KEY);
@@ -536,6 +698,14 @@ function loadGame() {
         Object.keys(gameState).forEach(key => {
             if (data[key] !== undefined) gameState[key] = data[key];
         });
+
+        const savedPrestige = localStorage.getItem(SAVE_KEY_PRESTIGE);
+        if (!savedPrestige) return;
+        const prestigeData = JSON.parse(savedPrestige);
+        Object.keys(prestigeState).forEach(key => {
+            if (prestigeData[key] !== undefined) prestigeState[key] = prestigeData[key];
+        });
+
     } catch (e) {
         console.warn('Save corrupto, empezando de cero');
     }

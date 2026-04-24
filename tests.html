@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Void Forge — Tests</title>
+    <style>
+        body { font-family: monospace; background: #05050f; color: #d0d0ff; padding: 20px; }
+        .suite { margin: 20px 0; }
+        .suite-title { font-size: 1.1rem; color: #00f0ff; margin-bottom: 8px; }
+        .test { padding: 6px 12px; margin: 4px 0; border-radius: 4px; font-size: 0.9rem; }
+        .pass { background: rgba(0,255,136,0.1); color: #00ff88; }
+        .fail { background: rgba(255,45,85,0.1); color: #ff2d55; }
+        .summary { margin-top: 30px; font-size: 1.1rem; border-top: 1px solid #1a1a33; padding-top: 16px; }
+    </style>
+</head>
+<body>
+    <h1 style="color:#00f0ff">⚗️ Void Forge — Tests</h1>
+    <div id="results"></div>
+    <div id="summary" class="summary"></div>
+
+<script>
+// ── Mini framework ──────────────────────────────────────
+let passed = 0;
+let failed = 0;
+let currentSuite = '';
+
+function describe(name, fn) {
+    currentSuite = name;
+    const suiteEl = document.createElement('div');
+    suiteEl.className = 'suite';
+    suiteEl.innerHTML = `<div class="suite-title">📦 ${name}</div>`;
+    suiteEl.id = `suite-${name}`;
+    document.getElementById('results').appendChild(suiteEl);
+    fn();
+}
+
+function it(name, fn) {
+    const el = document.createElement('div');
+    el.className = 'test';
+    try {
+        fn();
+        el.classList.add('pass');
+        el.textContent = `✅ ${name}`;
+        passed++;
+    } catch(e) {
+        el.classList.add('fail');
+        el.textContent = `❌ ${name} — ${e.message}`;
+        failed++;
+    }
+    document.getElementById(`suite-${currentSuite}`).appendChild(el);
+}
+
+function expect(value) {
+    return {
+        toBe: (expected) => {
+            if (value !== expected)
+                throw new Error(`esperaba ${expected}, recibió ${value}`);
+        },
+        toEqual: (expected) => {
+            if (JSON.stringify(value) !== JSON.stringify(expected))
+                throw new Error(`esperaba ${JSON.stringify(expected)}, recibió ${JSON.stringify(value)}`);
+        },
+        toBeGreaterThan: (expected) => {
+            if (value <= expected)
+                throw new Error(`esperaba > ${expected}, recibió ${value}`);
+        },
+        toBeLessThanOrEqual: (expected) => {
+            if (value > expected)
+                throw new Error(`esperaba <= ${expected}, recibió ${value}`);
+        },
+        toBe: (expected) => {
+            if (value !== expected)
+                throw new Error(`esperaba ${expected}, recibió ${value}`);
+        },
+        toBeFalsy: () => {
+            if (value) throw new Error(`esperaba falsy, recibió ${value}`);
+        },
+        toBeTruthy: () => {
+            if (!value) throw new Error(`esperaba truthy, recibió ${value}`);
+        },
+    };
+}
+
+// ── CONFIG (copia de tu CONFIG real) ───────────────────
+const CONFIG = {
+    upgrades: [
+        { id: 1, baseCost: 150,     manualDamage: 12  },
+        { id: 2, baseCost: 8000,    manualDamage: 45  },
+        { id: 3, baseCost: 250000,  manualDamage: 160 },
+        { id: 4, baseCost: 8000000, manualDamage: 520 },
+    ],
+    dpsImprovements: [
+        { id: 101, upgradeId: 1, multiplier: 0.20 },
+        { id: 201, upgradeId: 2, multiplier: 0.28 },
+        { id: 301, upgradeId: 3, multiplier: 0.60 },
+        { id: 401, upgradeId: 4, multiplier: 0.90 },
+    ],
+    bosses: [
+        { id: 1, baseHP: 50000   },
+        { id: 2, baseHP: 300000  },
+        { id: 3, baseHP: 1500000 },
+        { id: 4, baseHP: 8000000 },
+    ],
+    prestigeCost: {
+        tier1: { shardCost: 800,  essenceCost: 5000   },
+        tier2: { shardCost: 2500, essenceCost: 50000  },
+        tier3: { shardCost: 8000, essenceCost: 500000 },
+    },
+    scalingPerLoop: 1.45,
+    growth: { upgrade: 1.38, dps: 1.30 },
+};
+
+// ── Funciones puras (copiadas de script.js) ─────────────
+const getCost = (base, growth, level) => Math.floor(base * Math.pow(growth, level));
+
+function calculateManualDamage(upgradesOwned) {
+    return CONFIG.upgrades.reduce((total, conf) => {
+        return total + (conf.manualDamage * (upgradesOwned[conf.id] || 0));
+    }, 0);
+}
+
+function getBossHP(bossConfig, loopCount) {
+    return Math.floor(bossConfig.baseHP * Math.pow(CONFIG.scalingPerLoop, loopCount));
+}
+
+function getPrestigeCost(prestigeCount) {
+    if (prestigeCount < 1) return CONFIG.prestigeCost.tier1;
+    if (prestigeCount < 3) return CONFIG.prestigeCost.tier2;
+    return CONFIG.prestigeCost.tier3;
+}
+
+function canPrestige(essence, shards, prestigeCount) {
+    const cost = getPrestigeCost(prestigeCount);
+    return essence >= cost.essenceCost && shards >= cost.shardCost;
+}
+
+function computeDPS(dpsLevels, upgradesOwned) {
+    const manualDmg = calculateManualDamage(upgradesOwned);
+    const rawDPS = CONFIG.dpsImprovements.reduce((total, conf) => {
+        const level = dpsLevels[conf.id] || 0;
+        const owned = upgradesOwned[conf.upgradeId] || 0;
+        if (level === 0 || owned === 0) return total;
+        const baseUpg = CONFIG.upgrades.find(u => u.id === conf.upgradeId);
+        return total + (baseUpg.manualDamage * conf.multiplier * level * owned);
+    }, 0);
+    return Math.min(rawDPS, manualDmg * 0.85);
+}
+
+function canBuyPrestigeNode(node, unlockedNodes, shards, prestigeCount) {
+    if (unlockedNodes[node.id] === 1) return false;
+    if (prestigeCount < node.prestigeId) return false;
+    if (shards < node.cost) return false;
+    return true;
+}
+
+// ── TESTS ───────────────────────────────────────────────
+// describe('nombreDeTuFuncionNueva', () => {
+//     it('caso normal', () => {
+//         expect(tuFuncion(inputNormal)).toBe(resultadoEsperado);
+//     });
+//     it('caso límite', () => {
+//         expect(tuFuncion(0)).toBe(0);
+//     });
+//     it('caso que debería fallar', () => {
+//         expect(tuFuncion(inputMalo)).toBeFalsy();
+//     });
+// });
+
+describe('getCost', () => {
+    it('devuelve el coste base en nivel 0', () => {
+        expect(getCost(150, 1.38, 0)).toBe(150);
+    });
+    it('escala correctamente en nivel 1', () => {
+        expect(getCost(150, 1.38, 1)).toBe(Math.floor(150 * 1.38));
+    });
+    it('siempre devuelve un entero', () => {
+        const result = getCost(150, 1.38, 7);
+        expect(result).toBe(Math.floor(result));
+    });
+});
+
+describe('calculateManualDamage', () => {
+    it('devuelve 0 sin upgrades', () => {
+        expect(calculateManualDamage({ 1:0, 2:0, 3:0, 4:0 })).toBe(0);
+    });
+    it('calcula correctamente con un upgrade', () => {
+        expect(calculateManualDamage({ 1:5, 2:0, 3:0, 4:0 })).toBe(60);
+    });
+    it('suma correctamente varios upgrades', () => {
+        expect(calculateManualDamage({ 1:2, 2:1, 3:0, 4:0 })).toBe(69);
+    });
+});
+
+describe('getBossHP', () => {
+    it('en loop 0 devuelve el HP base', () => {
+        expect(getBossHP(CONFIG.bosses[0], 0)).toBe(50000);
+    });
+    it('escala correctamente en loop 1', () => {
+        expect(getBossHP(CONFIG.bosses[0], 1)).toBe(Math.floor(50000 * 1.45));
+    });
+    it('loop 5 es mayor que loop 0', () => {
+        expect(getBossHP(CONFIG.bosses[0], 5)).toBeGreaterThan(50000);
+    });
+});
+
+describe('getPrestigeCost', () => {
+    it('devuelve tier1 en prestige 0', () => {
+        expect(getPrestigeCost(0)).toEqual(CONFIG.prestigeCost.tier1);
+    });
+    it('devuelve tier2 en prestige 1', () => {
+        expect(getPrestigeCost(1)).toEqual(CONFIG.prestigeCost.tier2);
+    });
+    it('devuelve tier3 en prestige 3 o más', () => {
+        expect(getPrestigeCost(3)).toEqual(CONFIG.prestigeCost.tier3);
+    });
+});
+
+describe('canPrestige', () => {
+    it('no puede sin recursos', () => {
+        expect(canPrestige(0, 0, 0)).toBeFalsy();
+    });
+    it('no puede solo con essence', () => {
+        expect(canPrestige(5000, 0, 0)).toBeFalsy();
+    });
+    it('no puede solo con shards', () => {
+        expect(canPrestige(0, 800, 0)).toBeFalsy();
+    });
+    it('puede con recursos exactos', () => {
+        expect(canPrestige(5000, 800, 0)).toBeTruthy();
+    });
+});
+
+describe('computeDPS', () => {
+    it('devuelve 0 sin niveles de DPS', () => {
+        expect(computeDPS(
+            { 101:0, 201:0, 301:0, 401:0 },
+            { 1:10, 2:0, 3:0, 4:0 }
+        )).toBe(0);
+    });
+    it('nunca supera el 85% del daño manual', () => {
+        const owned = { 1:50, 2:20, 3:10, 4:5 };
+        const dps = computeDPS({ 101:5, 201:5, 301:5, 401:5 }, owned);
+        expect(dps).toBeLessThanOrEqual(calculateManualDamage(owned) * 0.85);
+    });
+});
+
+describe('canBuyPrestigeNode', () => {
+    const node = { id: 101, prestigeId: 1, cost: 200 };
+    it('no puede si ya está desbloqueado', () => {
+        expect(canBuyPrestigeNode(node, { 101:1 }, 9999, 5)).toBeFalsy();
+    });
+    it('no puede si el tier no está disponible', () => {
+        expect(canBuyPrestigeNode(node, { 101:0 }, 9999, 0)).toBeFalsy();
+    });
+    it('no puede sin shards suficientes', () => {
+        expect(canBuyPrestigeNode(node, { 101:0 }, 50, 1)).toBeFalsy();
+    });
+    it('puede con todo correcto', () => {
+        expect(canBuyPrestigeNode(node, { 101:0 }, 200, 1)).toBeTruthy();
+    });
+});
+
+
+// ── Resumen final ───────────────────────────────────────
+document.getElementById('summary').innerHTML = `
+    Total: ${passed + failed} tests — 
+    <span style="color:#00ff88">✅ ${passed} pasados</span> — 
+    <span style="color:#ff2d55">❌ ${failed} fallados</span>
+`;
+</script>
+</body>
+</html>
